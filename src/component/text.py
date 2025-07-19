@@ -37,5 +37,12 @@ class Font(Enum):
         )
 
 
-def draw_text(draw: ImageDraw, xy: tuple[int, int], font: Font, text: str):
-    draw.text(xy, text, font=font.font, fill=0)
+def draw_text(
+    draw: ImageDraw,
+    xy: tuple[int, int],
+    font: Font,
+    text: str,
+    anchor="la",
+):
+    draw.text(xy, text, font=font.font, fill=0, anchor=anchor)
+

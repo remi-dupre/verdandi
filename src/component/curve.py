@@ -49,7 +49,7 @@ def draw_curve(
             [
                 (x, y)
                 for (x, y) in points_for_shade(
-                    (x_separator + 1, y_min, x_max, y_max), 12
+                    (x_separator + 1, y_min, x_max, y_max), 16
                 )
                 if y >= min_height[x - x_min]
             ]
