@@ -36,7 +36,10 @@ async def get_weather() -> MetricWeather:
     hourly = [
         WeatherPoint(
             temperature=data["hourly"]["temperature_2m"][i],
-            weather_code=WMO_MAPPING[data["hourly"]["weather_code"][i]],
+            weather_code=WMO_MAPPING.get(
+                data["hourly"]["weather_code"][i],
+                WeatherCode.UNKNOWN,
+            ),
             rain_probability=data["hourly"]["precipitation_probability"][i],
         )
         for i in range(0, 25)
@@ -46,7 +49,10 @@ async def get_weather() -> MetricWeather:
         time=datetime.fromisoformat(data["current"]["time"]),
         temperature=data["current"]["temperature_2m"],
         temperature_apparent=data["current"]["apparent_temperature"],
-        weather_code=WMO_MAPPING[data["current"]["weather_code"]],
+        weather_code=WMO_MAPPING.get(
+            data["current"]["weather_code"],
+            WeatherCode.UNKNOWN,
+        ),
         sunrise=datetime.fromisoformat(data["daily"]["sunrise"][0]).time(),
         sunset=datetime.fromisoformat(data["daily"]["sunset"][0]).time(),
         hourly=hourly,

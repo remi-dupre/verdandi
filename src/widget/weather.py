@@ -23,7 +23,7 @@ class WidgetWeather3x4(Widget):
 
         draw_text(draw, (MARGIN, MARGIN), Font.MEDIUM, "Aujourd'hui")
         draw_text(draw, (50, 15), Font.XLARGE, f"{round(weather.temperature)}°")
-        draw_icon(draw, (10, 35), "large-clear")
+        draw_icon(draw, (MARGIN, 32), "large-" + weather.weather_code.value)
 
         # Section: min & max temperature
         draw_vertical_pill(

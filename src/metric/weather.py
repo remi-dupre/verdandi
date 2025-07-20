@@ -16,6 +16,7 @@ class WeatherCode(Enum):
     SNOW_FALL_MODERATE = "snow-fall-moderate"
     SNOW_FALL_HEAVY = "snow-fall-heavy"
     THUNDER = "thunder"
+    UNKNOWN = "unknown"
 
 
 @dataclass
