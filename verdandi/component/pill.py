@@ -1,5 +1,6 @@
 from PIL.ImageDraw import ImageDraw
-from util.draw import xy_to_bounds, points_for_shade
+
+from verdandi.util.draw import xy_to_bounds, points_for_shade
 
 
 def draw_vertical_pill(draw: ImageDraw, xy: tuple[int, int, int, int], progress: float):

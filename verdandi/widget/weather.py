@@ -1,11 +1,11 @@
 from PIL.ImageDraw import ImageDraw
 
-from widget import Widget
-from component.text import Font, draw_text
-from component.pill import draw_vertical_pill
-from component.icon import draw_icon
-from component.curve import draw_curve
-from metric.weather import MetricWeather
+from verdandi.widget import Widget
+from verdandi.component.text import Font, draw_text
+from verdandi.component.pill import draw_vertical_pill
+from verdandi.component.icon import draw_icon
+from verdandi.component.curve import draw_curve
+from verdandi.metric.weather import MetricWeather
 
 
 MARGIN = 6

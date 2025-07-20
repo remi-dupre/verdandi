@@ -2,7 +2,7 @@ from datetime import datetime
 
 import aiohttp
 
-from metric.weather import WeatherCode, MetricWeather, WeatherPoint
+from verdandi.metric.weather import WeatherCode, MetricWeather, WeatherPoint
 
 WMO_REV_MAPPING = {
     WeatherCode.CLEAR: [0],

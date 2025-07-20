@@ -4,7 +4,7 @@ from functools import cached_property
 from PIL import ImageFont
 from PIL.ImageDraw import ImageDraw
 
-from util.common import DIR_DATA
+from verdandi.util.common import DIR_DATA
 
 DIR_FONTS = DIR_DATA / "fonts"
 
@@ -45,4 +45,3 @@ def draw_text(
     anchor="la",
 ):
     draw.text(xy, text, font=font.font, fill=0, anchor=anchor)
-

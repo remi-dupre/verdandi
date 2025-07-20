@@ -3,8 +3,8 @@ from functools import cache
 from PIL import Image
 from PIL.ImageDraw import ImageDraw
 
-from util.common import DIR_DATA
-from metric.weather import WeatherCode
+from verdandi.util.common import DIR_DATA
+from verdandi.metric.weather import WeatherCode
 
 
 DIR_ICONS = DIR_DATA / "icons"

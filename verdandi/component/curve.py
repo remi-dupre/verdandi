@@ -2,7 +2,7 @@ from typing import Callable
 
 from PIL.ImageDraw import ImageDraw
 
-from util.draw import points_for_shade, xy_to_bounds
+from verdandi.util.draw import points_for_shade, xy_to_bounds
 
 
 def draw_curve(
