@@ -9,10 +9,10 @@ def draw_curve(
     draw: ImageDraw,
     xy: tuple[int, int, int, int],
     curve: Callable[[float], float],
-    progress: float = 1.0,
+    shade_parts: list[tuple[float, int]] = [(1.0, 16)],
 ):
+    assert len(shade_parts) > 0
     (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
-    x_separator = x_min + int((x_max - x_min) * progress)
 
     min_height = [
         y_min + int((y_max - y_min) * (1.0 - curve((x - x_min) / (x_max - x_min))))
@@ -23,42 +23,20 @@ def draw_curve(
     draw.point([(x_min + dx, y) for dx, y in enumerate(min_height)])
     draw.point([(x_min + dx, y - 1) for dx, y in enumerate(min_height)])
 
-    # Draw a vertical dashed line at progress position
-    draw.point(
-        [
-            (x_separator, y)
-            for y in range(min_height[x_separator - x_min], y_max + 1)
-            if (y - y_min) % 3 < 2
-        ]
-    )
+    # Draw each section with its own density
+    prev_cursor = 0.0
 
-    draw.point(
-        [
-            (x_separator + 1, y)
-            for y in range(min_height[x_separator - x_min], y_max + 1)
-            if (y - y_min) % 3 < 2
-        ]
-    )
+    for cursor, density in shade_parts:
+        x_start = x_min + int((x_max - x_min) * prev_cursor)
+        x_end = x_min + int((x_max - x_min) * cursor)
+        prev_cursor = cursor
 
-    # Draw the pre-separator part of the curve
-    if x_separator > x_min:
         draw.point(
             [
                 (x, y)
                 for (x, y) in points_for_shade(
-                    (x_min, y_min, x_separator - 1, y_max), 8
-                )
-                if y >= min_height[x - x_min]
-            ]
-        )
-
-    # Draw the post-separator part of the curve
-    if x_separator < x_max:
-        draw.point(
-            [
-                (x, y)
-                for (x, y) in points_for_shade(
-                    (x_separator + 1, y_min, x_max, y_max), 16
+                    (x_start, y_min, x_end - 1, y_max),
+                    density,
                 )
                 if y >= min_height[x - x_min]
             ]

@@ -42,7 +42,7 @@ async def get_weather() -> MetricWeather:
             ),
             rain_probability=data["hourly"]["precipitation_probability"][i],
         )
-        for i in range(0, 25)
+        for i in range(0, 49)
     ]
 
     return MetricWeather(

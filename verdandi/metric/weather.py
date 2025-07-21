@@ -1,6 +1,7 @@
 from datetime import datetime, time
-from dataclasses import dataclass
 from enum import Enum
+
+from pydantic import BaseModel, conlist
 
 
 class WeatherCode(Enum):
@@ -19,19 +20,17 @@ class WeatherCode(Enum):
     UNKNOWN = "unknown"
 
 
-@dataclass
-class WeatherPoint:
+class WeatherPoint(BaseModel):
     temperature: float
     weather_code: WeatherCode
     rain_probability: float
 
 
-@dataclass
-class MetricWeather:
+class MetricWeather(BaseModel):
     time: datetime
     temperature: float
     temperature_apparent: float
     weather_code: WeatherCode
     sunrise: time
     sunset: time
-    hourly: list[WeatherPoint]
+    hourly: list[WeatherPoint] = conlist(WeatherPoint, min_length=49, max_length=49)
