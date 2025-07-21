@@ -21,11 +21,20 @@ def draw_curve(
 
     # Draw the outline of the curve
     draw.point([(x_min + dx, y) for dx, y in enumerate(min_height)])
+    draw.point([(x_min + dx, y - 1) for dx, y in enumerate(min_height)])
 
     # Draw a vertical dashed line at progress position
     draw.point(
         [
             (x_separator, y)
+            for y in range(min_height[x_separator - x_min], y_max + 1)
+            if (y - y_min) % 3 < 2
+        ]
+    )
+
+    draw.point(
+        [
+            (x_separator + 1, y)
             for y in range(min_height[x_separator - x_min], y_max + 1)
             if (y - y_min) % 3 < 2
         ]

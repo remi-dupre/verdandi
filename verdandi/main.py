@@ -17,7 +17,7 @@ DIR_DATA = Path(__file__).parent.parent / "data"
 @app.get("/")
 async def generate_image():
     weather = await get_weather()
-    img = Image.new(mode="1", size=(389, 229), color=1)
+    img = Image.new(mode="1", size=(385, 225), color=1)
     WidgetWeather3x4.apply(img, (1, 1), weather)
     buffer = BytesIO()
     img.save(buffer, "png")
