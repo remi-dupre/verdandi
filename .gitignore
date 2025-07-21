@@ -7,7 +7,9 @@ wheels/
 *.egg-info
 
 # Virtual environments
+.envrc
 .venv
+shell.nix
 
 # Generated
 test.png

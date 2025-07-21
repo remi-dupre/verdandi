@@ -21,32 +21,31 @@ class WidgetWeather3x4(Widget):
         temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
         temp_max = max(max(x.temperature for x in weather.hourly), weather.temperature)
 
-        draw_text(draw, (MARGIN, MARGIN), Font.MEDIUM, "Aujourd'hui")
-        draw_text(draw, (50, 15), Font.XLARGE, f"{round(weather.temperature)}°")
-        draw_icon(draw, (MARGIN, 32), "large-" + weather.weather_code.value)
+        draw_icon(draw, (MARGIN, 22), "xlarge-" + weather.weather_code.value)
+        draw_text(draw, (75, 10), Font.XLARGE, f"{round(weather.temperature)}°")
 
         # Section: min & max temperature
         draw_vertical_pill(
             draw,
-            (170, 13, 176, 38),
+            (190, 13, 196, 38),
             (weather.temperature - temp_min) / (temp_max - temp_min),
         )
 
-        draw_text(draw, (180, 10), Font.SMALL, "Extrêmes")
-        draw_text(draw, (180, 18), Font.LARGE, f"{round(temp_min)}°-{round(temp_max)}°")
+        draw_text(draw, (200, 10), Font.SMALL, "Extrêmes")
+        draw_text(draw, (200, 18), Font.LARGE, f"{round(temp_min)}°-{round(temp_max)}°")
 
         # Section: apparent temperature
-        draw_text(draw, (180, 50), Font.SMALL, "Ressenti")
+        draw_text(draw, (200, 50), Font.SMALL, "Ressenti")
 
         draw_text(
-            draw, (180, 58), Font.LARGE, f"{round(weather.temperature_apparent)}°"
+            draw, (200, 58), Font.LARGE, f"{round(weather.temperature_apparent)}°"
         )
 
         # Section: sun events
-        draw_text(draw, (280, 10), Font.SMALL, "Lever du Soleil")
-        draw_text(draw, (280, 18), Font.LARGE, weather.sunrise.isoformat("minutes"))
-        draw_text(draw, (280, 50), Font.SMALL, "Coucher du Soleil")
-        draw_text(draw, (280, 58), Font.LARGE, weather.sunset.isoformat("minutes"))
+        draw_text(draw, (295, 10), Font.SMALL, "Lever du Soleil")
+        draw_text(draw, (295, 18), Font.LARGE, weather.sunrise.isoformat("minutes"))
+        draw_text(draw, (295, 50), Font.SMALL, "Coucher du Soleil")
+        draw_text(draw, (295, 58), Font.LARGE, weather.sunset.isoformat("minutes"))
 
         # Section: hourly
         def temp_func(hour: float) -> float:

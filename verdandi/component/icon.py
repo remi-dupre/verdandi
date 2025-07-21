@@ -24,5 +24,6 @@ def draw_icon(draw: ImageDraw, xy: tuple[int, int], icon_name: str):
 # Runtime checks
 
 for code in WeatherCode:
-    assert (DIR_ICONS / f"small-{code.value}.png").exists(), f"no small icon for {code}"
-    assert (DIR_ICONS / f"large-{code.value}.png").exists(), f"no large icon for {code}"
+    for size in ("small", "large", "xlarge"):
+        path = DIR_ICONS / f"{size}-{code.value}.png"
+        assert path.exists(), f"no {size} icon for {code}"
