@@ -1,7 +1,12 @@
 from datetime import datetime, time
 from enum import Enum
+from functools import cache
+from typing import ClassVar
 
+import aiohttp
 from pydantic import BaseModel, conlist
+
+from verdandi.metric.abs_metric import Metric, MetricConfig
 
 
 class WeatherCode(Enum):
@@ -19,6 +24,32 @@ class WeatherCode(Enum):
     THUNDER = "thunder"
     UNKNOWN = "unknown"
 
+    @classmethod
+    def from_wmo_mapping(cls, wmo_code: int) -> "WeatherCode":
+        return cls.wmo_mapping().get(wmo_code, cls.UNKNOWN)
+
+    @classmethod
+    @cache
+    def wmo_mapping(cls) -> dict[int, "WeatherCode"]:
+        rev_mapping = {
+            cls.CLEAR: [0],
+            cls.MAINLY_CLEAR: [1],
+            cls.PARTLY_CLOUDY: [2],
+            cls.OVERCAST: [3],
+            cls.FOG: [45, 48],
+            cls.RAIN_LIGHT: [51, 53, 55, 56, 57, 61, 66, 80],
+            cls.RAIN_MODERATE: [63, 81],
+            cls.RAIN_HEAVY: [65, 67, 82],
+            cls.SNOW_FALL_LIGHT: [71],
+            cls.SNOW_FALL_MODERATE: [73, 77],
+            cls.SNOW_FALL_HEAVY: [75],
+            cls.THUNDER: [95, 96, 99],
+        }
+
+        return {
+            num: code for (code, num_list) in rev_mapping.items() for num in num_list
+        }
+
 
 class WeatherPoint(BaseModel):
     temperature: float
@@ -26,7 +57,8 @@ class WeatherPoint(BaseModel):
     rain_probability: float
 
 
-class MetricWeather(BaseModel):
+class WeatherMetric(Metric):
+    name = "weather"
     time: datetime
     temperature: float
     temperature_apparent: float
@@ -34,3 +66,50 @@ class MetricWeather(BaseModel):
     sunrise: time
     sunset: time
     hourly: list[WeatherPoint] = conlist(WeatherPoint, min_length=49, max_length=49)
+
+
+class WeatherConfig(MetricConfig[WeatherMetric]):
+    lat: float
+    lon: float
+    timezone: str
+
+    API_URL: ClassVar[str] = "https://api.open-meteo.com/v1/forecast"
+
+    async def load(self) -> WeatherMetric:
+        params = {
+            "latitude": self.lat,
+            "longitude": self.lon,
+            "daily": "sunrise,sunset",
+            "hourly": "temperature_2m,weather_code,precipitation_probability",
+            "current": "temperature_2m,apparent_temperature,weather_code",
+            "timezone": self.timezone,
+        }
+
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(verify_ssl=False)
+        ) as http:
+            async with http.get(self.API_URL, params=params) as resp:
+                data = await resp.json()
+
+        hourly = [
+            WeatherPoint(
+                temperature=temperature,
+                weather_code=WeatherCode.from_wmo_mapping(wmo_code),
+                rain_probability=rain_probability,
+            )
+            for (temperature, wmo_code, rain_probability) in zip(
+                data["hourly"]["temperature_2m"],
+                data["hourly"]["weather_code"],
+                data["hourly"]["precipitation_probability"],
+            )
+        ]
+
+        return WeatherMetric(
+            time=datetime.fromisoformat(data["current"]["time"]),
+            temperature=data["current"]["temperature_2m"],
+            temperature_apparent=data["current"]["apparent_temperature"],
+            weather_code=WeatherCode.from_wmo_mapping(data["current"]["weather_code"]),
+            sunrise=datetime.fromisoformat(data["daily"]["sunrise"][0]).time(),
+            sunset=datetime.fromisoformat(data["daily"]["sunset"][0]).time(),
+            hourly=hourly,
+        )

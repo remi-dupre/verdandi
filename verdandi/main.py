@@ -4,9 +4,9 @@ from pathlib import Path
 from PIL import Image
 from fastapi import FastAPI, Response
 
-
+from verdandi.configuration import configuration
+from verdandi.metric.weather import WeatherConfig
 from verdandi.widget.weather import WidgetWeather3x4
-from verdandi.provider.openmeteo import get_weather
 
 app = FastAPI()
 
@@ -16,9 +16,19 @@ DIR_DATA = Path(__file__).parent.parent / "data"
 
 @app.get("/")
 async def generate_image():
-    weather = await get_weather()
-    img = Image.new(mode="1", size=(385, 225), color=1)
-    WidgetWeather3x4.apply(img, (1, 1), weather)
+    widget = WidgetWeather3x4(
+        weather=WeatherConfig(
+            lat=48.8534,
+            lon=2.3488,
+            timezone="Europe/Paris",
+        )
+    )
+
+    img = Image.new(mode="1", size=configuration.size, color=1)
+
+    for widget in configuration.widgets:
+        await widget.config.apply(img, widget.position)
+
     buffer = BytesIO()
     img.save(buffer, "png")
     buffer.seek(0)

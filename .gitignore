@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.ruff_cache
 
 # Virtual environments
 .envrc
@@ -13,3 +14,6 @@ shell.nix
 
 # Generated
 test.png
+
+# Configuration
+api-config.yaml

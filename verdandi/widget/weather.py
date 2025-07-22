@@ -2,12 +2,12 @@ from datetime import datetime, timedelta
 
 from PIL.ImageDraw import ImageDraw
 
-from verdandi.widget import Widget
+from verdandi.widget.abs_widget import Widget
 from verdandi.component.text import Font, draw_text
 from verdandi.component.pill import draw_vertical_pill
 from verdandi.component.icon import draw_icon
 from verdandi.component.curve import draw_curve
-from verdandi.metric.weather import MetricWeather
+from verdandi.metric.weather import WeatherMetric, WeatherConfig
 
 
 MARGIN = 6
@@ -17,9 +17,10 @@ class WidgetWeather3x4(Widget):
     name = "weather-3x4"
     width = 383
     height = 223
+    weather: WeatherConfig
 
     @classmethod
-    def draw(cls, draw: ImageDraw, weather: MetricWeather):
+    def draw(cls, draw: ImageDraw, weather: WeatherMetric):
         temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
         temp_max = max(max(x.temperature for x in weather.hourly), weather.temperature)
 
