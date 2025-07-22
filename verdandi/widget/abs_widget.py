@@ -1,5 +1,5 @@
 import asyncio
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 from typing import ClassVar
 
 from PIL import Image
@@ -35,6 +35,6 @@ class Widget(ABC, BaseModel):
         self.draw(draw, **kwargs)
         img.paste(tmp_img, xy)
 
-    @abstractclassmethod
-    def draw(cls, draw: ImageDraw, xy: tuple[int, int], *args, **kwargs):
+    @abstractmethod
+    def draw(self, draw: ImageDraw, xy: tuple[int, int], *args, **kwargs):
         raise NotImplementedError

@@ -1,3 +1,3 @@
-from verdandi.widget.weather import WidgetWeather3x4
+from verdandi.widget.weather import WeatherRecap3x2, WeatherWeek3x1
 
-ALL_WIDGETS = [WidgetWeather3x4]
+ALL_WIDGETS = [WeatherRecap3x2, WeatherWeek3x1]

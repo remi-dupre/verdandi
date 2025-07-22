@@ -1,8 +1,8 @@
 import os
-from typing import Union, Literal
+from typing import Annotated, Union, Literal
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from verdandi.widget import ALL_WIDGETS
 
@@ -24,11 +24,11 @@ _all_widget_configs = [widget_config_for(w) for w in ALL_WIDGETS]
 
 class ApiConfiguration(BaseModel):
     size: tuple[int, int]
-    widgets: list[Union[*_all_widget_configs]]
+    widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]
 
     @classmethod
     def load(cls) -> "ApiConfiguration":
-        with open("api-config.yaml") as file:
+        with open(CONFIGURATION_PATH) as file:
             data = yaml.load(file, Loader=yaml.CSafeLoader)  # ty: ignore[possibly-unbound-attribute]
 
         return cls(**data)

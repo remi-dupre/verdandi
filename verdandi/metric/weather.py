@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, date
 from enum import Enum
 from functools import cache
 from typing import ClassVar
@@ -51,10 +51,17 @@ class WeatherCode(Enum):
         }
 
 
-class WeatherPoint(BaseModel):
+class HourlyData(BaseModel):
     temperature: float
     weather_code: WeatherCode
     rain_probability: float
+
+
+class DailyData(BaseModel):
+    date: date
+    weather_code: WeatherCode
+    temperature_min: float
+    temperature_max: float
 
 
 class WeatherMetric(Metric):
@@ -65,7 +72,8 @@ class WeatherMetric(Metric):
     weather_code: WeatherCode
     sunrise: time
     sunset: time
-    hourly: list[WeatherPoint] = conlist(WeatherPoint, min_length=49, max_length=49)
+    daily: list[DailyData] = conlist(DailyData, min_length=7, max_length=7)
+    hourly: list[HourlyData] = conlist(HourlyData, min_length=49, max_length=49)
 
 
 class WeatherConfig(MetricConfig[WeatherMetric]):
@@ -79,7 +87,7 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
         params = {
             "latitude": self.lat,
             "longitude": self.lon,
-            "daily": "sunrise,sunset",
+            "daily": "sunrise,sunset,weather_code,temperature_2m_min,temperature_2m_max",
             "hourly": "temperature_2m,weather_code,precipitation_probability",
             "current": "temperature_2m,apparent_temperature,weather_code",
             "timezone": self.timezone,
@@ -91,8 +99,23 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
             async with http.get(self.API_URL, params=params) as resp:
                 data = await resp.json()
 
+        daily = [
+            DailyData(
+                date=date.fromisoformat(time_str),
+                weather_code=WeatherCode.from_wmo_mapping(wmo_code),
+                temperature_min=temperature_min,
+                temperature_max=temperature_max,
+            )
+            for (time_str, wmo_code, temperature_min, temperature_max) in zip(
+                data["daily"]["time"],
+                data["daily"]["weather_code"],
+                data["daily"]["temperature_2m_min"],
+                data["daily"]["temperature_2m_max"],
+            )
+        ]
+
         hourly = [
-            WeatherPoint(
+            HourlyData(
                 temperature=temperature,
                 weather_code=WeatherCode.from_wmo_mapping(wmo_code),
                 rain_probability=rain_probability,
@@ -111,5 +134,6 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
             weather_code=WeatherCode.from_wmo_mapping(data["current"]["weather_code"]),
             sunrise=datetime.fromisoformat(data["daily"]["sunrise"][0]).time(),
             sunset=datetime.fromisoformat(data["daily"]["sunset"][0]).time(),
+            daily=daily,
             hourly=hourly,
         )

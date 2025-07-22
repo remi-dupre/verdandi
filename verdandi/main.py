@@ -6,7 +6,7 @@ from fastapi import FastAPI, Response
 
 from verdandi.configuration import configuration
 from verdandi.metric.weather import WeatherConfig
-from verdandi.widget.weather import WidgetWeather3x4
+from verdandi.widget.weather import WeatherRecap3x2
 
 app = FastAPI()
 
@@ -16,7 +16,7 @@ DIR_DATA = Path(__file__).parent.parent / "data"
 
 @app.get("/")
 async def generate_image():
-    widget = WidgetWeather3x4(
+    widget = WeatherRecap3x2(
         weather=WeatherConfig(
             lat=48.8534,
             lon=2.3488,

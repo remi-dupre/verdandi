@@ -8,19 +8,19 @@ from verdandi.component.pill import draw_vertical_pill
 from verdandi.component.icon import draw_icon
 from verdandi.component.curve import draw_curve
 from verdandi.metric.weather import WeatherMetric, WeatherConfig
+from verdandi.util.date import weekday_humanized
 
 
 MARGIN = 6
 
 
-class WidgetWeather3x4(Widget):
-    name = "weather-3x4"
+class WeatherRecap3x2(Widget):
+    name = "weather-recap-3x2"
     width = 383
     height = 223
     weather: WeatherConfig
 
-    @classmethod
-    def draw(cls, draw: ImageDraw, weather: WeatherMetric):
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):
         temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
         temp_max = max(max(x.temperature for x in weather.hourly), weather.temperature)
 
@@ -84,10 +84,10 @@ class WidgetWeather3x4(Widget):
             sunset_cursor = (sunset - weather.time).total_seconds() / (24.0 * 3600.0)
             density = [(sunrise_cursor, 5), (sunset_cursor, 17), (1.0, 5)]
 
-        draw_curve(draw, (14, 90, cls.width - 14, 150), temp_func, density)
+        draw_curve(draw, (14, 90, self.width - 14, 150), temp_func, density)
 
         for i in range(0, 25, 2):
-            x = 14 + (cls.width - 28) * i // 24
+            x = 14 + (self.width - 28) * i // 24
             hour = (start_hour + i) % 24
             draw_text(draw, (x, 160), Font.SMALL, f"{hour:02}h", anchor="ma")
 
@@ -112,3 +112,43 @@ class WidgetWeather3x4(Widget):
                 f"{round(weather.hourly[hour].rain_probability)}%",
                 anchor="ma",
             )
+
+
+class WeatherWeek3x1(Widget):
+    name = "weather-week-3x1"
+    width = 383
+    height = 111
+    weather: WeatherConfig
+
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):
+        cell_width = 128
+        cell_height = 50
+
+        for i, day in enumerate(weather.daily[1:]):
+            col = i % 3
+            row = i // 3
+
+            pos_x = MARGIN + col * cell_width
+            pos_y = MARGIN + row * cell_height
+
+            draw_icon(
+                draw,
+                (pos_x, pos_y),
+                "large-" + day.weather_code.value,
+            )
+
+            draw_text(
+                draw,
+                (pos_x + 48, pos_y + 4),
+                Font.MEDIUM,
+                weekday_humanized(day.date).capitalize(),
+            )
+
+            draw_text(
+                draw,
+                (pos_x + 48, pos_y + 16),
+                Font.XMEDIUM_BOLD,
+                f"{round(day.temperature_min)}°-{round(day.temperature_max)}°",
+            )
+
+        draw.point([(x, MARGIN + 48) for x in range(21, self.width - 20, 3)])
