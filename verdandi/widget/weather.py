@@ -99,7 +99,7 @@ class WeatherRecap3x2(Widget):
             sunrise_cursor = (sunrise - weather.time).total_seconds() / (24.0 * 3600.0)
             density = [(sunset_cursor, 17), (sunrise_cursor, 5), (1.0, 17)]
         else:
-            sunrise = datetime.combine(curr_date, weather.sunrise)
+            sunrise = datetime.combine(curr_date, weather.sunrise) + timedelta(days=1)
             sunrise_cursor = (sunrise - weather.time).total_seconds() / (24.0 * 3600.0)
             sunset = datetime.combine(curr_date + timedelta(days=1), weather.sunset)
             sunset_cursor = (sunset - weather.time).total_seconds() / (24.0 * 3600.0)
