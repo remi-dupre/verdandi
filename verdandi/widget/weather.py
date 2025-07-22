@@ -35,20 +35,41 @@ class WeatherRecap3x2(Widget):
         )
 
         draw_text(draw, (200, 10), Font.SMALL, "Extrêmes")
-        draw_text(draw, (200, 18), Font.LARGE, f"{round(temp_min)}°-{round(temp_max)}°")
+
+        draw_text(
+            draw,
+            (200, 18),
+            Font.XMEDIUM_BOLD,
+            f"{round(temp_min)}°-{round(temp_max)}°",
+        )
 
         # Section: apparent temperature
         draw_text(draw, (200, 50), Font.SMALL, "Ressenti")
 
         draw_text(
-            draw, (200, 58), Font.LARGE, f"{round(weather.temperature_apparent)}°"
+            draw,
+            (200, 58),
+            Font.XMEDIUM_BOLD,
+            f"{round(weather.temperature_apparent)}°",
         )
 
         # Section: sun events
         draw_text(draw, (295, 10), Font.SMALL, "Lever du Soleil")
-        draw_text(draw, (295, 18), Font.LARGE, weather.sunrise.isoformat("minutes"))
         draw_text(draw, (295, 50), Font.SMALL, "Coucher du Soleil")
-        draw_text(draw, (295, 58), Font.LARGE, weather.sunset.isoformat("minutes"))
+
+        draw_text(
+            draw,
+            (295, 18),
+            Font.XMEDIUM_BOLD,
+            weather.sunrise.isoformat("minutes"),
+        )
+
+        draw_text(
+            draw,
+            (295, 58),
+            Font.XMEDIUM_BOLD,
+            weather.sunset.isoformat("minutes"),
+        )
 
         # Get biggest hour of the day that's before current time
         start_hour = weather.time.hour
