@@ -23,4 +23,4 @@ def draw_progress(draw: ImageDraw, xy: tuple[int, int, int, int], progress: floa
     draw.line((gauge_x, y_min, gauge_x, y_max), width=2)
 
     if gauge_x > x_min:
-        draw.point(points_for_shade((x_min + 2, y_min + 2, gauge_x + 1, y_max - 2), 17))
+        draw.point(points_for_shade((x_min + 2, y_min + 2, gauge_x + 1, y_max - 2), 10))

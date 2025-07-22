@@ -1,4 +1,4 @@
-from datetime import datetime, time, date
+from datetime import datetime, time, date, timedelta
 from enum import Enum
 from functools import cache
 from typing import ClassVar
@@ -7,6 +7,8 @@ import aiohttp
 from pydantic import BaseModel, conlist
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
+from verdandi.util.logging import log_duration_async
+from verdandi.util.cache import time_cache_async
 
 
 class WeatherCode(Enum):
@@ -83,6 +85,8 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
 
     API_URL: ClassVar[str] = "https://api.open-meteo.com/v1/forecast"
 
+    @time_cache_async(timedelta(minutes=5))
+    @log_duration_async("Fetch weather data")
     async def load(self) -> WeatherMetric:
         params = {
             "latitude": self.lat,
