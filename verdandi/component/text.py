@@ -14,6 +14,7 @@ class Font(Enum):
     MEDIUM = auto()
     XMEDIUM_BOLD = auto()
     LARGE = auto()
+    LARGE_BOLD = auto()
     XLARGE = auto()
 
     @cached_property
@@ -30,6 +31,9 @@ class Font(Enum):
                 size = 20
             case self.LARGE:
                 name = "FiraSans-Regular"
+                size = 24
+            case self.LARGE_BOLD:
+                name = "FiraSans-Bold"
                 size = 24
             case self.XLARGE:
                 name = "FiraSans-Regular"
