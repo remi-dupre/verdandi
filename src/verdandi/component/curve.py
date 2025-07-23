@@ -27,6 +27,7 @@ def draw_curve(
     prev_cursor = 0.0
 
     for cursor, density in shade_parts:
+        assert prev_cursor <= cursor <= 1.0
         x_start = x_min + int((x_max - x_min) * prev_cursor)
         x_end = x_min + int((x_max - x_min) * cursor)
         prev_cursor = cursor
@@ -35,7 +36,7 @@ def draw_curve(
             [
                 (x, y)
                 for (x, y) in points_for_shade(
-                    (x_start, y_min, x_end - 1, y_max),
+                    (x_start, y_min, x_end, y_max),
                     density,
                 )
                 if y >= min_height[x - x_min]
