@@ -13,6 +13,9 @@ dependencies = [
     "pyyaml>=6.0.2",
 ]
 
+[project.scripts]
+docgen = "scripts.docgen:run"
+
 [dependency-groups]
 dev = [
     "fastapi[standard]>=0.116.1",
@@ -21,4 +24,5 @@ dev = [
 ]
 
 [tool.uv]
+package = true
 default-groups = []

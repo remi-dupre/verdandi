@@ -18,7 +18,18 @@ class WeatherRecap3x2(Widget):
     name = "weather-recap-3x2"
     width = 383
     height = 223
+
     weather: WeatherConfig
+
+    @classmethod
+    def example(cls) -> "WeatherRecap3x2":
+        return WeatherRecap3x2(
+            weather=WeatherConfig(
+                lat=48.871,
+                lon=2.292,
+                timezone="Europe/Paris",
+            )
+        )
 
     def draw(self, draw: ImageDraw, weather: WeatherMetric):
         temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
@@ -139,7 +150,18 @@ class WeatherWeek3x1(Widget):
     name = "weather-week-3x1"
     width = 383
     height = 111
+
     weather: WeatherConfig
+
+    @classmethod
+    def example(cls) -> "WeatherWeek3x1":
+        return WeatherWeek3x1(
+            weather=WeatherConfig(
+                lat=48.871,
+                lon=2.292,
+                timezone="Europe/Paris",
+            )
+        )
 
     def draw(self, draw: ImageDraw, weather: WeatherMetric):
         cell_width = 128

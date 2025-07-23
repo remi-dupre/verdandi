@@ -19,6 +19,14 @@ class Countdown2x1(Widget):
     date_start: date
     date_end: date
 
+    @classmethod
+    def example(cls) -> "Countdown2x1":
+        return Countdown2x1(
+            title="New decade",
+            date_start=date.fromisoformat("2020-01-01"),
+            date_end=date.fromisoformat("2030-01-01"),
+        )
+
     def draw(self, draw: ImageDraw):
         now = date.today()
 

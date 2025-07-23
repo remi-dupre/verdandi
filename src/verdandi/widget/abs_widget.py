@@ -1,6 +1,6 @@
 import asyncio
-from abc import ABC, abstractmethod
-from typing import ClassVar
+from abc import ABC, abstractmethod, abstractclassmethod
+from typing import ClassVar, Self
 
 from PIL import Image
 from PIL.ImageDraw import ImageDraw
@@ -14,7 +14,15 @@ class Widget(ABC, BaseModel):
     width: ClassVar[int]
     height: ClassVar[int]
 
-    async def apply(self, img: Image.Image, xy: tuple[int, int]):
+    @abstractclassmethod
+    def example(cls) -> Self:
+        raise NotImplementedError
+
+    @abstractmethod
+    def draw(self, draw: ImageDraw, *args, **kwargs):
+        raise NotImplementedError
+
+    async def render(self) -> Image.Image:
         # Fetch all metrics
         metric_values = await asyncio.gather(
             *(
@@ -28,13 +36,9 @@ class Widget(ABC, BaseModel):
         )
 
         kwargs = {val.name: val for val in metric_values}
-        tmp_img = Image.new(mode="1", size=(self.width, self.height), color=1)
 
-        # Daw in a temporary buffer and then paste at appropriate location
-        draw = ImageDraw(tmp_img)
+        # Daw in a temporary buffer
+        res = Image.new(mode="1", size=(self.width, self.height), color=1)
+        draw = ImageDraw(res)
         self.draw(draw, **kwargs)
-        img.paste(tmp_img, xy)
-
-    @abstractmethod
-    def draw(self, draw: ImageDraw, xy: tuple[int, int], *args, **kwargs):
-        raise NotImplementedError
+        return res

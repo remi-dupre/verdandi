@@ -1,6 +1,3 @@
-import math
-
-
 def xy_to_bounds(
     xy: tuple[int, int, int, int],
 ) -> tuple[tuple[int, int], tuple[int, int]]:

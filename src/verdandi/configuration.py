@@ -34,4 +34,4 @@ class ApiConfiguration(BaseModel):
         return cls(**data)
 
 
-configuration = ApiConfiguration.load()
+configuration: ApiConfiguration = ApiConfiguration.load()

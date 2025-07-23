@@ -7,8 +7,8 @@ import aiohttp
 from pydantic import BaseModel, conlist
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
-from verdandi.util.logging import log_duration_async
-from verdandi.util.cache import time_cache_async
+from verdandi.util.logging import async_log_duration
+from verdandi.util.cache import async_time_cache
 
 
 class WeatherCode(Enum):
@@ -85,23 +85,47 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
 
     API_URL: ClassVar[str] = "https://api.open-meteo.com/v1/forecast"
 
-    @time_cache_async(timedelta(minutes=5))
-    @log_duration_async("Fetch weather data")
+    API_DAILY_METRICS: ClassVar[list[str]] = [
+        "sunrise",
+        "sunset",
+        "weather_code",
+        "temperature_2m_min",
+        "temperature_2m_max",
+    ]
+
+    API_HOURLY_METRICS: ClassVar[list[str]] = [
+        "temperature_2m",
+        "weather_code",
+        "precipitation_probability",
+    ]
+
+    API_CURRENT_METRICS: ClassVar[list[str]] = [
+        "temperature_2m",
+        "apparent_temperature",
+        "weather_code",
+    ]
+
+    @staticmethod
+    @cache
+    def get_http_client() -> aiohttp.ClientSession:
+        # TODO: why? is this a NixOS issue?
+        connector = aiohttp.TCPConnector(verify_ssl=False)
+        return aiohttp.ClientSession(connector=connector)
+
+    @async_time_cache(timedelta(minutes=5))
+    @async_log_duration("Fetch weather data")
     async def load(self) -> WeatherMetric:
         params = {
             "latitude": self.lat,
             "longitude": self.lon,
-            "daily": "sunrise,sunset,weather_code,temperature_2m_min,temperature_2m_max",
-            "hourly": "temperature_2m,weather_code,precipitation_probability",
-            "current": "temperature_2m,apparent_temperature,weather_code",
+            "daily": ",".join(self.API_DAILY_METRICS),
+            "hourly": ",".join(self.API_HOURLY_METRICS),
+            "current": ",".join(self.API_CURRENT_METRICS),
             "timezone": self.timezone,
         }
 
-        async with aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(verify_ssl=False)
-        ) as http:
-            async with http.get(self.API_URL, params=params) as resp:
-                data = await resp.json()
+        async with self.get_http_client().get(self.API_URL, params=params) as resp:
+            data = await resp.json()
 
         daily = [
             DailyData(
