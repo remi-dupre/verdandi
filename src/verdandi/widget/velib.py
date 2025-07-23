@@ -41,5 +41,5 @@ class Velib1x1(Widget):
             anchor="mm",
         )
 
-        draw_icon(draw, (42, 68), "custom-bike")
+        draw_icon(draw, (43, 68), "custom-bike")
         draw_text(draw, (60, 98), Font.SMALL, velib.station_name.upper(), anchor="mm")
