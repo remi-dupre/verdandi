@@ -1,3 +1,4 @@
+import logging
 import asyncio
 from functools import cache
 from typing import ClassVar
@@ -6,9 +7,11 @@ from datetime import timedelta
 import aiohttp
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
-from verdandi.util.logging import logger
 from verdandi.util.logging import async_log_duration
 from verdandi.util.cache import async_time_cache
+
+
+logger = logging.getLogger(__name__)
 
 
 class VelibMetric(Metric):
@@ -36,7 +39,7 @@ class VelibConfig(MetricConfig[VelibMetric]):
 
     @classmethod
     @async_time_cache(timedelta(hours=1))
-    @async_log_duration("Fetch velib informations")
+    @async_log_duration(logger, "Fetch velib informations")
     async def get_stations_information(cls) -> dict:
         url = cls.API_URL + "/station_information.json"
 
@@ -47,7 +50,7 @@ class VelibConfig(MetricConfig[VelibMetric]):
 
     @classmethod
     @async_time_cache(timedelta(seconds=30))
-    @async_log_duration("Fetch velib statuses")
+    @async_log_duration(logger, "Fetch velib statuses")
     async def get_stations_status(cls) -> dict:
         url = cls.API_URL + "/station_status.json"
 

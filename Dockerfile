@@ -4,4 +4,9 @@ COPY . .
 
 RUN uv sync --locked
 
-CMD ["uv", "run", "fastapi", "run", "src/verdandi/app.py", "--port", "80"]
+CMD [ \
+    "uv", "run", "uvicorn", \
+    "--log-config", "src/log-config.json", \
+    "--host", "0.0.0.0", \
+    "--port", "80", \
+    "src.verdandi.app:app" ]

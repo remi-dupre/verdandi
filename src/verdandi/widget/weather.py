@@ -32,6 +32,13 @@ class WeatherRecap3x2(Widget):
         )
 
     def draw(self, draw: ImageDraw, weather: WeatherMetric):
+        # Get biggest hour of the day that's before current time
+        curr_date = weather.time.date()
+        curr_time = weather.time.time()
+        curr_time.replace(minute=0)
+        curr_dt = datetime.combine(curr_date, curr_time)
+
+        # Find temperature bounds
         temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
         temp_max = max(max(x.temperature for x in weather.hourly), weather.temperature)
 
@@ -65,29 +72,26 @@ class WeatherRecap3x2(Widget):
         )
 
         # Section: sun events
-        draw_text(draw, (295, 10), Font.SMALL, "Lever du Soleil")
-        draw_text(draw, (295, 50), Font.SMALL, "Coucher du Soleil")
+        draw_text(draw, (290, 10), Font.SMALL, "Lever du Soleil")
+        draw_text(draw, (290, 50), Font.SMALL, "Coucher du Soleil")
 
         draw_text(
             draw,
-            (295, 18),
+            (290, 18),
             Font.XMEDIUM_BOLD,
             weather.sunrise.isoformat("minutes"),
         )
 
         draw_text(
             draw,
-            (295, 58),
+            (290, 58),
             Font.XMEDIUM_BOLD,
             weather.sunset.isoformat("minutes"),
         )
 
-        # Get biggest hour of the day that's before current time
-        start_hour = weather.time.hour
-
         # Section: hourly
         def temp_func(val: float) -> float:
-            hour = start_hour + val * 24.0
+            hour = curr_time.hour + val * 24.0
             prev_val = weather.hourly[int(hour)].temperature
 
             if hour < 48.0:
@@ -100,27 +104,31 @@ class WeatherRecap3x2(Widget):
             return 0.1 + 0.9 * (val - temp_min) / (temp_max - temp_min)
 
         # Shade the curve between sunset & surise
-        curr_date = weather.time.date()
-        curr_time = weather.time.time()
+        shade_day = 17
+        shade_night = 5
+        next_date = curr_date + timedelta(days=1)
 
-        if curr_time < weather.sunset:
-            sunset = datetime.combine(curr_date, weather.sunset)
-            sunset_cursor = (sunset - weather.time).total_seconds() / (24.0 * 3600.0)
-            sunrise = datetime.combine(curr_date + timedelta(days=1), weather.sunrise)
-            sunrise_cursor = (sunrise - weather.time).total_seconds() / (24.0 * 3600.0)
-            density = [(sunset_cursor, 17), (sunrise_cursor, 5), (1.0, 17)]
-        else:
-            sunrise = datetime.combine(curr_date, weather.sunrise) + timedelta(days=1)
-            sunrise_cursor = (sunrise - weather.time).total_seconds() / (24.0 * 3600.0)
-            sunset = datetime.combine(curr_date + timedelta(days=1), weather.sunset)
-            sunset_cursor = (sunset - weather.time).total_seconds() / (24.0 * 3600.0)
-            density = [(sunrise_cursor, 5), (sunset_cursor, 17), (1.0, 5)]
+        sun_events = [
+            (datetime.combine(curr_date, weather.sunrise), shade_night),
+            (datetime.combine(curr_date, weather.sunset), shade_day),
+            (datetime.combine(next_date, weather.sunrise), shade_night),
+            (datetime.combine(next_date, weather.sunset), shade_day),
+        ]
 
+        while curr_dt >= sun_events[0][0]:
+            sun_events.pop(0)
+
+        density = [
+            ((dt - curr_dt).total_seconds() / (24.0 * 3600.0), density)
+            for dt, density in sun_events[:2]
+        ]
+
+        density.append((1.0, shade_day + shade_night - density[-1][1]))
         draw_curve(draw, (14, 90, self.width - 14, 150), temp_func, density)
 
         for i in range(0, 25, 2):
             x = 14 + (self.width - 28) * i // 24
-            hour = (start_hour + i) % 24
+            hour = (curr_time.hour + i) % 24
             draw_text(draw, (x, 160), Font.SMALL, f"{hour:02}h", anchor="ma")
 
             draw_text(

@@ -1,3 +1,4 @@
+import logging
 import asyncio
 from pathlib import Path
 
@@ -9,13 +10,14 @@ from verdandi.util.logging import async_log_duration
 from verdandi.util.image import image_to_bytes
 
 app = FastAPI()
+logger = logging.getLogger(__name__)
 
 
 DIR_DATA = Path(__file__).parent.parent / "data"
 
 
 @app.get("/")
-@async_log_duration("Generate canvas")
+@async_log_duration(logger, "Generate canvas")
 async def generate_image():
     # Render all widgets concurently
     widget_imgs = await asyncio.gather(

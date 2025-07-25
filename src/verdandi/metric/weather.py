@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, time, date, timedelta
 from enum import Enum
 from functools import cache
@@ -9,6 +10,9 @@ from pydantic import BaseModel, conlist
 from verdandi.metric.abs_metric import Metric, MetricConfig
 from verdandi.util.logging import async_log_duration
 from verdandi.util.cache import async_time_cache
+
+
+logger = logging.getLogger(__name__)
 
 
 class WeatherCode(Enum):
@@ -113,7 +117,7 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
         return aiohttp.ClientSession(connector=connector)
 
     @async_time_cache(timedelta(minutes=5))
-    @async_log_duration("Fetch weather data")
+    @async_log_duration(logger, "Fetch weather data")
     async def load(self) -> WeatherMetric:
         params = {
             "latitude": self.lat,

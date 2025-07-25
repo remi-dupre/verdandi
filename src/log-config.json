@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "simple": {
+      "format": "{asctime:.19} | {levelname:^.4} | {message}",
+      "datefmt": "%Y-%m-%d %H:%M:%S %z",
+      "style": "{"
+    }
+  },
+  "handlers": {
+    "stderr": {
+      "class": "logging.StreamHandler",
+      "formatter": "simple"
+    }
+  },
+  "loggers": {
+    "": {
+      "level": "INFO",
+      "handlers": ["stderr"]
+    }
+  }
+}
