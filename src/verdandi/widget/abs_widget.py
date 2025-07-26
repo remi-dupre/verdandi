@@ -7,6 +7,7 @@ from PIL.ImageDraw import ImageDraw
 from pydantic import BaseModel
 
 from verdandi.metric.abs_metric import MetricConfig
+from verdandi.util.common import executor
 
 
 class Widget(ABC, BaseModel):
@@ -22,6 +23,12 @@ class Widget(ABC, BaseModel):
     def draw(self, draw: ImageDraw, *args, **kwargs):
         raise NotImplementedError
 
+    def _init_and_draw(self, **kwargs):
+        res = Image.new(mode="1", size=(self.width, self.height), color=1)
+        draw = ImageDraw(res)
+        self.draw(draw, **kwargs)
+        return res
+
     async def render(self) -> Image.Image:
         # Fetch all metrics
         metric_values = await asyncio.gather(
@@ -35,10 +42,10 @@ class Widget(ABC, BaseModel):
             )
         )
 
+        loop = asyncio.get_event_loop()
         kwargs = {val.name: val for val in metric_values}
 
-        # Daw in a temporary buffer
-        res = Image.new(mode="1", size=(self.width, self.height), color=1)
-        draw = ImageDraw(res)
-        self.draw(draw, **kwargs)
-        return res
+        return await loop.run_in_executor(
+            executor,
+            lambda: self._init_and_draw(**kwargs),
+        )
