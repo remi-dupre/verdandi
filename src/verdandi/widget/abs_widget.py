@@ -12,8 +12,15 @@ from verdandi.util.common import executor
 
 class Widget(ABC, BaseModel):
     name: ClassVar[str]
-    width: ClassVar[int]
-    height: ClassVar[int]
+    size: ClassVar[tuple[int]]
+
+    @property
+    def width(self) -> int:
+        return 133 * self.size[0]
+
+    @property
+    def height(self) -> int:
+        return 120 * self.size[1]
 
     @abstractclassmethod
     def example(cls) -> Self:

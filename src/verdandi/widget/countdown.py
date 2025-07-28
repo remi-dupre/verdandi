@@ -12,8 +12,7 @@ MARGIN = 6
 
 class Countdown2x1(Widget):
     name = "countdown-2x1"
-    width = 252
-    height = 111
+    size = (2, 1)
 
     title: str
     date_start: date

@@ -1,6 +1,6 @@
 from PIL.ImageDraw import ImageDraw
 
-from verdandi.util.draw import points_for_shade, xy_to_bounds
+from verdandi.util.draw import points_for_shade, xy_to_bounds, fill_with_shade
 
 
 def draw_vertical_pill(draw: ImageDraw, xy: tuple[int, int, int, int], progress: float):
@@ -23,4 +23,8 @@ def draw_progress(draw: ImageDraw, xy: tuple[int, int, int, int], progress: floa
     draw.line((gauge_x, y_min, gauge_x, y_max), width=2)
 
     if gauge_x > x_min:
-        draw.point(points_for_shade((x_min + 2, y_min + 2, gauge_x + 1, y_max - 2), 10))
+        fill_with_shade(
+            draw._image,
+            ((x_min + gauge_x) // 2, (y_min + y_max) // 2),
+            spacing=10,
+        )

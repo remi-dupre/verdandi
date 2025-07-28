@@ -9,9 +9,7 @@ from verdandi.metric.velib import VelibMetric, VelibConfig
 
 class Velib1x1(Widget):
     name = "velib-1x1"
-    width = 120
-    height = 111
-
+    size = (1, 1)
     velib: VelibConfig
 
     @classmethod

@@ -12,6 +12,7 @@ DIR_FONTS = DIR_DATA / "fonts"
 class Font(Enum):
     SMALL = auto()
     MEDIUM = auto()
+    XMEDIUM = auto()
     XMEDIUM_BOLD = auto()
     LARGE = auto()
     LARGE_BOLD = auto()
@@ -26,6 +27,9 @@ class Font(Enum):
             case self.MEDIUM:
                 name = "PixelOperatorHB"
                 size = 16
+            case self.XMEDIUM:
+                name = "FiraSans-Regular"
+                size = 20
             case self.XMEDIUM_BOLD:
                 name = "FiraSans-Bold"
                 size = 20

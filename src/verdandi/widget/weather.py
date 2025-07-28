@@ -16,9 +16,7 @@ MARGIN = 6
 
 class WeatherRecap3x2(Widget):
     name = "weather-recap-3x2"
-    width = 383
-    height = 223
-
+    size = (3, 2)
     weather: WeatherConfig
 
     @classmethod
@@ -156,9 +154,7 @@ class WeatherRecap3x2(Widget):
 
 class WeatherWeek3x1(Widget):
     name = "weather-week-3x1"
-    width = 383
-    height = 111
-
+    size = (3, 1)
     weather: WeatherConfig
 
     @classmethod
