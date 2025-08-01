@@ -12,7 +12,7 @@ CONFIGURATION_PATH = os.getenv("VERDANDI_CONFIG_FILE", "api-config.yaml")
 
 def widget_config_for(widget_type):
     class WidgetConfiguration(BaseModel):
-        name: Literal[widget_type.name]
+        name: Literal[widget_type.name]  # ty: ignore[invalid-type-form]
         position: tuple[int, int]
         config: widget_type
 
@@ -29,7 +29,10 @@ class ApiConfiguration(BaseModel):
     @classmethod
     def load(cls) -> "ApiConfiguration":
         with open(CONFIGURATION_PATH) as file:
-            data = yaml.load(file, Loader=yaml.CSafeLoader)  # ty: ignore[possibly-unbound-attribute]
+            data = yaml.load(
+                file,
+                Loader=yaml.CSafeLoader,  # ty: ignore[possibly-unbound-attribute]
+            )
 
         return cls(**data)
 

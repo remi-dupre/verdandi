@@ -1,5 +1,5 @@
 import asyncio
-from abc import ABC, abstractmethod, abstractclassmethod
+from abc import ABC, abstractmethod
 from typing import ClassVar, Self
 
 from PIL import Image
@@ -22,7 +22,8 @@ class Widget(ABC, BaseModel):
     def height(self) -> int:
         return 120 * self.size[1]
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def example(cls) -> Self:
         raise NotImplementedError
 

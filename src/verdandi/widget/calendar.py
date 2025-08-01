@@ -80,8 +80,6 @@ class Calendar3x4(Widget):
                 if y_pos > self.height - 24:
                     break
 
-                print(event)
-
                 time_str = (
                     event.date_start.strftime("%Hh%M")
                     + "-"
