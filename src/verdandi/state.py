@@ -8,7 +8,7 @@ from fastapi import Depends, Response
 from pydantic import BaseModel, Field
 
 
-MAX_REGISTRY_DURATION: timedelta = timedelta(minutes=5)
+MAX_REGISTRY_DURATION: timedelta = timedelta(hours=3)
 
 
 class RegistryEntry(BaseModel, arbitrary_types_allowed=True):

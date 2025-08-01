@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: ruff-check
       - id: ruff-format
+
   - repo: local
     hooks:
       - id: ty-check
@@ -13,3 +14,11 @@ repos:
         pass_filenames: false
         args: [--python=.venv/]
         additional_dependencies: [ty]
+
+      - id: pytest
+        name: pytest
+        entry: .venv/bin/pytest .
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true

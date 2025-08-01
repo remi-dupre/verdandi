@@ -44,7 +44,7 @@ class Widget(ABC, BaseModel):
                 metric_config.load()
                 for metric_config in map(
                     lambda field: getattr(self, field, None),
-                    self.model_fields,
+                    type(self).model_fields,
                 )
                 if isinstance(metric_config, MetricConfig)
             )

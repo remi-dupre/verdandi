@@ -113,7 +113,7 @@ class WeatherConfig(MetricConfig[WeatherMetric]):
     @cache
     def get_http_client() -> aiohttp.ClientSession:
         # TODO: why? is this a NixOS issue?
-        connector = aiohttp.TCPConnector(verify_ssl=False)
+        connector = aiohttp.TCPConnector(ssl=False)
         return aiohttp.ClientSession(connector=connector)
 
     @async_time_cache(timedelta(minutes=5))
