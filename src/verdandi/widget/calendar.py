@@ -6,7 +6,7 @@ from verdandi.widget.abs_widget import Widget
 from verdandi.util.draw import points_for_shade
 from verdandi.util.date import weekday_humanized, month_humanized
 from verdandi.metric.ics import ICSMetric, ICSConfig
-from verdandi.component.text import Font, draw_text
+from verdandi.component.text import Font, draw_text, TextArea, size_text
 from verdandi.util.text import keep_ascii
 
 MARGIN = 3
@@ -55,7 +55,7 @@ class Calendar3x4(Widget):
 
             if day == today:
                 text = "AUJOURD'HUI"
-            elif day + timedelta(days=1) == today:
+            elif day == today + timedelta(days=1):
                 text = "DEMAIN"
             elif day - today < timedelta(days=7):
                 text = weekday_humanized(day).upper()
@@ -64,17 +64,26 @@ class Calendar3x4(Widget):
             else:
                 text = None
 
-            draw_text(
-                draw,
-                (MARGIN + 9, y_pos + 4),
-                Font.MEDIUM,
-                str(day.day),
-                anchor="ma",
-            )
-
             if text is not None:
                 draw_text(draw, (28, y_pos), Font.XMEDIUM_BOLD, text)
-                y_pos += 24
+                title_width = size_text(draw, Font.XMEDIUM_BOLD, text) + 10
+                y_pos += 12
+            else:
+                title_width = 0
+
+            draw_text(
+                draw,
+                (MARGIN + 9, y_pos),
+                Font.MEDIUM,
+                str(day.day),
+                anchor="mm",
+            )
+
+            draw.point(
+                [(x, y_pos) for x in range(28 + title_width, self.width - MARGIN, 2)]
+            )
+
+            y_pos += 12
 
             for event in events:
                 if y_pos > self.height - 24:
@@ -87,26 +96,34 @@ class Calendar3x4(Widget):
                 ).replace("h00", "h")
 
                 if time_str == "00h-00h":
-                    draw_text(
-                        draw,
-                        (28, y_pos),
-                        Font.XMEDIUM,
-                        keep_ascii(event.summary),
+                    text_area = TextArea(
+                        draw=draw,
+                        bounds=(28, y_pos, self.width - MARGIN, None),
+                        line_height=22,
                     )
                 else:
-                    draw_text(draw, (73, y_pos + 9), Font.MEDIUM, time_str, anchor="mt")
+                    draw_text(draw, (73, y_pos + 7), Font.MEDIUM, time_str, anchor="mt")
 
                     draw.rounded_rectangle(
-                        (28, y_pos + 5, 28 + 89, y_pos + 21), radius=3
+                        (28, y_pos + 3, 28 + 89, y_pos + 19), radius=3
                     )
 
-                    draw_text(
-                        draw,
-                        (122, y_pos),
-                        Font.XMEDIUM,
-                        keep_ascii(event.summary),
+                    text_area = TextArea(
+                        draw=draw,
+                        bounds=(28, y_pos, self.width - MARGIN, None),
+                        line_height=22,
+                        cursor=(90, 0),
                     )
-                y_pos += 24
+
+                text_area.draw_text(Font.XMEDIUM, keep_ascii(event.summary))
+
+                text_area.draw_text(
+                    Font.MEDIUM,
+                    f"- {event.calendar.label}",
+                    breakable=False,
+                )
+
+                y_pos += text_area.height + 4
 
             y_pos += MARGIN_DAY
             prev_day = day
