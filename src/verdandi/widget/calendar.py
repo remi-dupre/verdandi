@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime, time
 
 from PIL.ImageDraw import ImageDraw
 
@@ -10,7 +10,8 @@ from verdandi.component.text import Font, draw_text, TextArea, size_text
 from verdandi.util.text import keep_ascii
 
 MARGIN = 3
-MARGIN_DAY = 10
+MARGIN_LINES = 4
+MARGIN_DAY = 8
 
 
 class Calendar3x4(Widget):
@@ -89,10 +90,26 @@ class Calendar3x4(Widget):
                 if y_pos > self.height - 24:
                     break
 
+                time_start = max(
+                    event.date_start,
+                    datetime.combine(
+                        day,
+                        time(0, 0),
+                        tzinfo=event.date_start.tzinfo,
+                    ),
+                )
+
+                time_end = min(
+                    event.date_end,
+                    datetime.combine(
+                        day + timedelta(days=1),
+                        time(0, 0),
+                        tzinfo=event.date_end.tzinfo,
+                    ),
+                )
+
                 time_str = (
-                    event.date_start.strftime("%Hh%M")
-                    + "-"
-                    + event.date_end.strftime("%Hh%M")
+                    time_start.strftime("%Hh%M") + "-" + time_end.strftime("%Hh%M")
                 ).replace("h00", "h")
 
                 if time_str == "00h-00h":
@@ -123,7 +140,7 @@ class Calendar3x4(Widget):
                     breakable=False,
                 )
 
-                y_pos += text_area.height + 4
+                y_pos += text_area.height + MARGIN_LINES
 
             y_pos += MARGIN_DAY
             prev_day = day
