@@ -12,17 +12,16 @@ async def test_direct(client: AsyncClient):
 
 @pytest.mark.parametrize("wait", ["false", "true"])
 async def test_async(client: AsyncClient, wait: str):
-    resp_new = await client.get("/canvas/new/", params={"wait": wait})
+    resp_new = await client.get("/canvas/redirect/", params={"wait": wait})
     assert resp_new.status_code == 200
     data_new = resp_new.json()
-    assert data_new["ready"] == (wait == "true")
-    entry_id = data_new["entry_id"]
+    url = data_new["url"]
 
     # A few more requests to fill the registry
-    await client.get("/canvas/new/", params={"wait": wait})
-    await client.get("/canvas/new/", params={"wait": wait})
+    await client.get("/canvas/redirect/", params={"wait": wait})
+    await client.get("/canvas/redirect/", params={"wait": wait})
 
-    resp_get = await client.get(f"/canvas/get/{entry_id}/")
+    resp_get = await client.get(url)
     assert resp_get.status_code == 200
 
 
@@ -38,12 +37,12 @@ async def test_registry(client: AsyncClient):
     time_fetch_invalid = "2025-07-01 18:00"
 
     with time_machine.travel(time_create):
-        resp_new = await client.get("/canvas/new/")
+        resp_new = await client.get("/canvas/redirect/")
         data_new = resp_new.json()
-        entry_id = data_new["entry_id"]
+        fetch_url = data_new["url"]
 
     async def is_valid() -> bool:
-        resp = await client.get(f"/canvas/get/{entry_id}/")
+        resp = await client.get(fetch_url)
         return resp.status_code == 200
 
     with time_machine.travel(time_create):

@@ -2,7 +2,7 @@ import os
 from typing import Annotated, Union, Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AnyHttpUrl
 
 from verdandi.widget import ALL_WIDGETS
 
@@ -23,12 +23,13 @@ _all_widget_configs = [widget_config_for(w) for w in ALL_WIDGETS]
 
 
 class ApiConfiguration(BaseModel):
+    base_url: AnyHttpUrl
     size: tuple[int, int]
     widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]
 
     @classmethod
-    def load(cls) -> "ApiConfiguration":
-        with open(CONFIGURATION_PATH) as file:
+    def load(cls, path: str | None = None) -> "ApiConfiguration":
+        with open(path or CONFIGURATION_PATH) as file:
             data = yaml.load(
                 file,
                 Loader=yaml.CSafeLoader,  # ty: ignore[possibly-unbound-attribute]

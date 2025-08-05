@@ -1,11 +1,12 @@
 import logging
 import asyncio
+import os
 from uuid import UUID, uuid4
 from typing import Annotated
 
 from PIL import Image
 from fastapi import FastAPI, Response, Path, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, AnyHttpUrl
 
 from verdandi.state import DepState
 from verdandi.configuration import configuration
@@ -44,20 +45,19 @@ async def _generate_canvas():
     )
 
 
-class PrepareResponse(BaseModel):
-    entry_id: Annotated[
-        UUID,
-        Field(title="Unique identifier for the generated canvas."),
-    ]
+class RedirectResponse(BaseModel):
+    """
+    Response specified by trmnl's redirect API.
+    See https://help.usetrmnl.com/en/articles/11035846-redirect-plugin
+    """
 
-    ready: Annotated[
-        bool,
-        Field(title="Wether the canvas is already ready to be fetched."),
-    ]
+    filename: str
+    url: AnyHttpUrl
+    refresh_rate: int = 30 * 60
 
 
 @app.get(
-    "/canvas/new/",
+    "/canvas/redirect/",
     tags=["canvas"],
     description="Start the generation of a new canvas.",
 )
@@ -67,7 +67,7 @@ async def canvas_prepare(
         bool,
         Query(title="Wait for the canvas to be ready before returning"),
     ] = False,
-) -> PrepareResponse:
+) -> RedirectResponse:
     entry_id = uuid4()
     task = asyncio.create_task(_generate_canvas(), name=f"generate-canvas-{entry_id}")
     await state.set_response(entry_id, task)
@@ -75,14 +75,19 @@ async def canvas_prepare(
     if wait:
         await task
 
-    return PrepareResponse(
-        entry_id=entry_id,
-        ready=task.done(),
+    return RedirectResponse(
+        filename=str(entry_id),
+        url=AnyHttpUrl(
+            os.path.join(
+                str(configuration.base_url),
+                f"canvas/redirect-get/{entry_id}/",
+            )
+        ),
     )
 
 
 @app.get(
-    "/canvas/get/{entry_id}/",
+    "/canvas/redirect-get/{entry_id}/",
     tags=["canvas"],
     description="Wait to retreive the new canvas.",
 )

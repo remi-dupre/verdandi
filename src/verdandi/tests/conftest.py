@@ -2,6 +2,10 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from typing import AsyncGenerator
 
+from pathlib import Path
+
+
+import verdandi.configuration
 from verdandi.app import app
 
 
@@ -16,9 +20,18 @@ def base_url() -> str:
 
 
 @pytest.fixture
-async def client(base_url: str) -> AsyncGenerator[AsyncClient]:
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url=base_url,
-    ) as client:
-        yield client
+async def client(base_url: str, monkeypatch) -> AsyncGenerator[AsyncClient]:
+    with monkeypatch.context() as m:
+        m.setattr(
+            verdandi.configuration,
+            "configuration",
+            verdandi.configuration.ApiConfiguration.load(
+                Path(__file__).parent / "test-config.yaml"
+            ),
+        )
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url=base_url,
+        ) as client:
+            yield client
