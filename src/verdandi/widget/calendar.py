@@ -24,7 +24,7 @@ class Calendar3x4(Widget):
         return Calendar3x4(
             ics=ICSConfig(
                 timezone="Europe/Paris",
-                calendars=[],
+                calendars=tuple(),
             )
         )
 

@@ -17,7 +17,7 @@ from verdandi.util.common import executor
 logger = logging.getLogger(__name__)
 
 
-class ICSCalendar(BaseModel):
+class ICSCalendar(BaseModel, frozen=True):
     url: AnyHttpUrl
     label: str
 
@@ -66,10 +66,10 @@ class ICSMetric(Metric):
     events: list[ICSEvent]
 
 
-class ICSConfig(MetricConfig[ICSMetric]):
+class ICSConfig(MetricConfig[ICSMetric], frozen=True):
     name: str = "ics"
     timezone: str
-    calendars: list[ICSCalendar]
+    calendars: tuple[ICSCalendar, ...]
 
     @staticmethod
     @cache

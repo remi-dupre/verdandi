@@ -82,7 +82,7 @@ class WeatherMetric(Metric):
     hourly: list[HourlyData] = conlist(HourlyData, min_length=49, max_length=49)
 
 
-class WeatherConfig(MetricConfig[WeatherMetric]):
+class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
     lat: float
     lon: float
     timezone: str
