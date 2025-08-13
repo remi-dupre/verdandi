@@ -41,7 +41,7 @@ class Calendar3x4(Widget):
 
         for event in ics.events:
             date_curr = event.date_start.date()
-            date_end = event.date_end.date()
+            date_end = (event.date_end - timedelta(seconds=1)).date()
 
             while date_curr <= date_end:
                 events_per_day.setdefault(date_curr, []).append(event)
@@ -50,7 +50,7 @@ class Calendar3x4(Widget):
         y_pos = MARGIN
         prev_day = None
 
-        for day, events in events_per_day.items():
+        for day, events in iter(events_per_day.items()):
             if y_pos > self.height - (24 + MARGIN_DAY):
                 break
 
