@@ -50,7 +50,9 @@ class Calendar3x4(Widget):
         y_pos = MARGIN
         prev_day = None
 
-        for day, events in events_per_day.items():
+        xxx = iter(events_per_day.items())
+        next(xxx)
+        for day, events in xxx:
             if y_pos > self.height - (24 + MARGIN_DAY):
                 break
 

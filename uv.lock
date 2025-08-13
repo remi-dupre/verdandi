@@ -311,6 +311,21 @@ wheels = [
 ]
 
 [[package]]
+name = "icalevents"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "icalendar" },
+    { name = "python-dateutil" },
+    { name = "pytz" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/91/89/ce1d2abf0237097f0f2bb157bf85c9708ab35ba37f7d1204a39b9600f482/icalevents-0.2.1.tar.gz", hash = "sha256:b7f2827b581269d4315b345b54cf7d661b4453a7b190f7dbef99e5ba8f5669e1", size = 9067, upload-time = "2025-02-17T08:07:02.893Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/6c/dfadd0ed128769fd6eb2fafa64b62a2a2186ec9ce3bbb71d01b133b0bc40/icalevents-0.2.1-py3-none-any.whl", hash = "sha256:c5186fea094a56d97ba01c805f6338875e299e7ebc4bc6bf8068399fbb7e5724", size = 10122, upload-time = "2025-02-17T08:07:34.829Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -652,6 +667,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2025.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3", size = 320884, upload-time = "2025-03-25T02:25:00.538Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00", size = 509225, upload-time = "2025-03-25T02:24:58.468Z" },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -952,6 +976,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "fastapi-cli" },
     { name = "icalendar" },
+    { name = "icalevents" },
     { name = "pillow" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -974,6 +999,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "fastapi-cli", specifier = ">=0.0.8" },
     { name = "icalendar", specifier = ">=6.3.1" },
+    { name = "icalevents", specifier = ">=0.2.1" },
     { name = "pillow", specifier = ">=11.3.0" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pyyaml", specifier = ">=6.0.2" },

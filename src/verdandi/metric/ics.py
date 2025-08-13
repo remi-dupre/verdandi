@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 import aiohttp
 import icalendar
+from icalevents.icalevents import events, Event
 from pydantic import AnyHttpUrl, BaseModel, AwareDatetime
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
@@ -53,12 +54,20 @@ class ICSEvent(BaseModel):
         date_start = date_start.astimezone(tz)
         date_end = date_end.astimezone(tz)
 
-        return cls(
+        res = cls(
             summary=event.get("SUMMARY", "???"),
             calendar=calendar,
             date_start=date_start,
             date_end=date_end,
         )
+
+        if "Fian" in res.summary:
+            print("--")
+            print(event)
+            print(res)
+            print(event.rdates)
+
+        return res
 
 
 class ICSMetric(Metric):
@@ -84,6 +93,9 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
 
         async with cls.get_http_client().get(str(cal.url)) as resp:
             data = await resp.read()
+
+        for event in events(string_content=data):
+            print(event, event.__dict__)
 
         return await loop.run_in_executor(
             executor,
