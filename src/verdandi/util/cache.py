@@ -1,4 +1,4 @@
-from asyncio import Lock
+from asyncio import Event
 from datetime import timedelta, datetime
 import functools
 import logging
@@ -44,26 +44,32 @@ def async_time_cache[**P, R](
             for key in expired_keys:
                 del wrapper.cache_store[key]
 
+            # If a compute event has been created for this key, wait for the
+            # computation to finish and return the resulting cache key.
+            if compute_event := wrapper.cache_compute_events.get(cache_key):
+                await compute_event.wait()
+                return wrapper.cache_store[cache_key].value
+
+            # Create a new compute event (which ensures no concurent call will
+            # happen)
+            compute_event = Event()
+            wrapper.cache_compute_events[cache_key] = compute_event
+
             # Fetch and update cache
-            async with wrapper.lock:
-                cache_slot: CacheSlot | None = wrapper.cache_store.get(cache_key)
+            cache_slot: CacheSlot | None = wrapper.cache_store.get(cache_key)
 
-                if cache_slot is not None and cache_slot.expiration >= now:
-                    return cache_slot.value
-
+            if cache_slot is None or cache_slot.expiration < now:
                 value = await func(*args, **kwargs)
+                cache_slot = CacheSlot(expiration=now + persistance, value=value)
+                wrapper.cache_store[cache_key] = cache_slot
 
-                wrapper.cache_store[cache_key] = CacheSlot(
-                    expiration=now + persistance,
-                    value=value,
-                )
+            # Notify the end of the event and clean it up
+            compute_event.set()
+            del wrapper.cache_compute_events[cache_key]
+            return cache_slot.value
 
-                return value
-
-            return wrapper.cache_value
-
-        wrapper.lock = Lock()
         wrapper.cache_store = {}
+        wrapper.cache_compute_events = {}
         return wrapper
 
     return decorator

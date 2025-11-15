@@ -2,6 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import ClassVar, Self
 
+import aiohttp
 from PIL import Image
 from PIL.ImageDraw import ImageDraw
 from pydantic import BaseModel
@@ -37,11 +38,11 @@ class Widget(ABC, BaseModel):
         self.draw(draw, **kwargs)
         return res
 
-    async def render(self) -> Image.Image:
+    async def render(self, http: aiohttp.ClientSession) -> Image.Image:
         # Fetch all metrics
         metric_values = await asyncio.gather(
             *(
-                metric_config.load()
+                metric_config.load(http)
                 for metric_config in map(
                     lambda field: getattr(self, field, None),
                     type(self).model_fields,

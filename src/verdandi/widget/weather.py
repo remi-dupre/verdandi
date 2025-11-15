@@ -36,10 +36,11 @@ class WeatherRecap3x2(Widget):
         curr_time.replace(minute=0)
         curr_dt = datetime.combine(curr_date, curr_time)
 
-        # Find temperature bounds
-        temp_min = min(min(x.temperature for x in weather.hourly), weather.temperature)
-        temp_max = max(max(x.temperature for x in weather.hourly), weather.temperature)
+        # Extract temperature bounds for today
+        today_temp_min = weather.daily[0].temperature_min
+        today_temp_max = weather.daily[0].temperature_max
 
+        # Secttion: temperature and weather now
         draw_icon(draw, (MARGIN, 22), "xlarge-" + weather.weather_code.value)
         draw_text(draw, (75, 10), Font.XLARGE, f"{round(weather.temperature)}°")
 
@@ -47,7 +48,7 @@ class WeatherRecap3x2(Widget):
         draw_vertical_pill(
             draw,
             (190, 13, 196, 38),
-            (weather.temperature - temp_min) / (temp_max - temp_min),
+            (weather.temperature - today_temp_min) / (today_temp_max - today_temp_min),
         )
 
         draw_text(draw, (200, 10), Font.SMALL, "Extrêmes")
@@ -56,7 +57,7 @@ class WeatherRecap3x2(Widget):
             draw,
             (200, 18),
             Font.XMEDIUM_BOLD,
-            f"{round(temp_min)}°-{round(temp_max)}°",
+            f"{round(today_temp_min)}°-{round(today_temp_max)}°",
         )
 
         # Section: apparent temperature
@@ -85,6 +86,17 @@ class WeatherRecap3x2(Widget):
             (290, 58),
             Font.XMEDIUM_BOLD,
             weather.sunset.isoformat("minutes"),
+        )
+
+        # Find temperature bounds for the next two days
+        temp_min = min(
+            min(x.temperature for x in weather.hourly[:49]),
+            weather.temperature,
+        )
+
+        temp_max = max(
+            max(x.temperature for x in weather.hourly[:49]),
+            weather.temperature,
         )
 
         # Section: hourly

@@ -109,16 +109,9 @@ class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
         "weather_code",
     ]
 
-    @staticmethod
-    @cache
-    def get_http_client() -> aiohttp.ClientSession:
-        # TODO: why? is this a NixOS issue?
-        connector = aiohttp.TCPConnector(ssl=False)
-        return aiohttp.ClientSession(connector=connector)
-
     @async_time_cache(timedelta(minutes=5))
     @async_log_duration(logger, "Fetch weather data")
-    async def load(self) -> WeatherMetric:
+    async def load(self, http: aiohttp.ClientSession) -> WeatherMetric:
         params = {
             "latitude": self.lat,
             "longitude": self.lon,
@@ -128,7 +121,7 @@ class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
             "timezone": self.timezone,
         }
 
-        async with self.get_http_client().get(self.API_URL, params=params) as resp:
+        async with http.get(self.API_URL, params=params) as resp:
             data = await resp.json()
 
         daily = [

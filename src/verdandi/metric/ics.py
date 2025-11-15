@@ -54,7 +54,7 @@ class ICSEvent(BaseModel):
         date_end = date_end.astimezone(tz)
 
         return cls(
-            summary=event.summary,
+            summary=event.summary or "",
             calendar=calendar,
             date_start=date_start,
             date_end=date_end,
@@ -72,17 +72,13 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
     calendars: tuple[ICSCalendar, ...]
 
     @staticmethod
-    @cache
-    def get_http_client() -> aiohttp.ClientSession:
-        # TODO: why? is this a NixOS issue?
-        connector = aiohttp.TCPConnector(ssl=False)
-        return aiohttp.ClientSession(connector=connector)
-
-    @classmethod
-    async def _load_from_url(cls, cal: ICSCalendar) -> list[Event]:
+    async def _load_from_url(
+        http: aiohttp.ClientSession,
+        cal: ICSCalendar,
+    ) -> list[Event]:
         loop = asyncio.get_event_loop()
 
-        async with cls.get_http_client().get(str(cal.url)) as resp:
+        async with http.get(str(cal.url)) as resp:
             data = await resp.read()
 
         events_res = await loop.run_in_executor(
@@ -99,13 +95,13 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
 
     @async_time_cache(timedelta(hours=3))
     @async_log_duration(logger, "Loading all calendars")
-    async def load(self) -> ICSMetric:
+    async def load(self, http: aiohttp.ClientSession) -> ICSMetric:
         tz = ZoneInfo(self.timezone)
         now = datetime.now(tz)
         events = []
 
         parsed_calendars = await asyncio.gather(
-            *(self._load_from_url(cal) for cal in self.calendars)
+            *(self._load_from_url(http, cal) for cal in self.calendars)
         )
 
         for calendar, lib_events in zip(self.calendars, parsed_calendars):

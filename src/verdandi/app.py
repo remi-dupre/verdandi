@@ -4,6 +4,7 @@ import os
 from uuid import UUID, uuid4
 from typing import Annotated
 
+import aiohttp
 from PIL import Image
 from fastapi import FastAPI, Response, Path, Query
 from pydantic import BaseModel, AnyHttpUrl
@@ -28,9 +29,12 @@ app = FastAPI(
 @async_log_duration(logger, "Canvas generation")
 async def _generate_canvas():
     # Render all widgets concurently
-    widget_imgs = await asyncio.gather(
-        *(widget.config.render() for widget in configuration.widgets)
-    )
+    connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
+
+    async with aiohttp.ClientSession(connector=connector) as http:
+        widget_imgs = await asyncio.gather(
+            *(widget.config.render(http) for widget in configuration.widgets)
+        )
 
     # Paste rendered widgets to appropriate locations in a canvas
     img = Image.new(mode="1", size=configuration.size, color=1)

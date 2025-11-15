@@ -1,12 +1,20 @@
+import re
+import os
 import pytest
-from httpx import ASGITransport, AsyncClient
+import json
 from typing import AsyncGenerator
-
+from unittest import mock
 from pathlib import Path
+
+import aiohttp
+from aioresponses import aioresponses
+from httpx import ASGITransport, AsyncClient
 
 
 import verdandi.configuration
 from verdandi.app import app
+
+FIXTURES_PATH = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture(autouse=True)
@@ -21,13 +29,17 @@ def base_url() -> str:
 
 @pytest.fixture
 async def client(base_url: str, monkeypatch) -> AsyncGenerator[AsyncClient]:
-    with monkeypatch.context() as m:
+    test_config_path = FIXTURES_PATH / "test-config.yaml"
+    test_env = {"VERDANDI_CONFIG_FILE": str(test_config_path)}
+
+    with (
+        mock.patch.dict(os.environ, test_env, clear=True),
+        monkeypatch.context() as m,
+    ):
         m.setattr(
             verdandi.configuration,
             "configuration",
-            verdandi.configuration.ApiConfiguration.load(
-                Path(__file__).parent / "test-config.yaml"
-            ),
+            verdandi.configuration.ApiConfiguration.load(test_config_path),
         )
 
         async with AsyncClient(
@@ -35,3 +47,15 @@ async def client(base_url: str, monkeypatch) -> AsyncGenerator[AsyncClient]:
             base_url=base_url,
         ) as client:
             yield client
+
+
+@pytest.fixture
+async def http() -> aiohttp.ClientSession:
+    async with aiohttp.ClientSession() as http:
+        with aioresponses() as mock:
+            mock.get(
+                re.compile("^https://api.open-meteo.com/v1/forecast.*$"),
+                payload=json.load(open(FIXTURES_PATH / "open-meteo.json")),
+            )
+
+            yield http

@@ -30,20 +30,13 @@ class VelibConfig(MetricConfig[VelibMetric]):
 
     station_id: int
 
-    @staticmethod
-    @cache
-    def get_http_client() -> aiohttp.ClientSession:
-        # TODO: why? is this a NixOS issue?
-        connector = aiohttp.TCPConnector(ssl=False)
-        return aiohttp.ClientSession(connector=connector)
-
     @classmethod
     @async_time_cache(timedelta(hours=1))
     @async_log_duration(logger, "Fetch velib informations")
-    async def get_stations_information(cls) -> dict:
+    async def get_stations_information(cls, http: aiohttp.ClientSession) -> dict:
         url = cls.API_URL + "/station_information.json"
 
-        async with cls.get_http_client().get(url) as resp:
+        async with http.get(url) as resp:
             data = await resp.json()
 
         return data["data"]["stations"]
@@ -51,18 +44,18 @@ class VelibConfig(MetricConfig[VelibMetric]):
     @classmethod
     @async_time_cache(timedelta(seconds=30))
     @async_log_duration(logger, "Fetch velib statuses")
-    async def get_stations_status(cls) -> dict:
+    async def get_stations_status(cls, http: aiohttp.ClientSession) -> dict:
         url = cls.API_URL + "/station_status.json"
 
-        async with cls.get_http_client().get(url) as resp:
+        async with http.get(url) as resp:
             data = await resp.json()
 
         return data["data"]["stations"]
 
-    async def load(self) -> VelibMetric:
+    async def load(self, http: aiohttp.ClientSession) -> VelibMetric:
         list_stations, list_status = await asyncio.gather(
-            self.get_stations_information(),
-            self.get_stations_status(),
+            self.get_stations_information(http),
+            self.get_stations_status(http),
         )
 
         status = next(
