@@ -16,6 +16,9 @@ from verdandi.util.common import executor
 logger = logging.getLogger(__name__)
 
 
+LABEL_SHOWCASE = "verdandi:showcase"
+
+
 class ICSCalendar(BaseModel, frozen=True):
     url: AnyHttpUrl
     label: str
@@ -26,6 +29,7 @@ class ICSEvent(BaseModel):
     calendar: ICSCalendar
     date_start: AwareDatetime
     date_end: AwareDatetime
+    showcase: bool
 
     @classmethod
     def from_lib(
@@ -52,18 +56,27 @@ class ICSEvent(BaseModel):
 
         date_start = date_start.astimezone(tz)
         date_end = date_end.astimezone(tz)
+        showcase = LABEL_SHOWCASE in (event.description or "")
 
         return cls(
             summary=event.summary or "",
             calendar=calendar,
             date_start=date_start,
             date_end=date_end,
+            showcase=showcase,
         )
 
 
 class ICSMetric(Metric):
     name: ClassVar[str] = "ics"
-    events: list[ICSEvent]
+    upcoming: list[ICSEvent]
+    showcase: list[ICSEvent]
+
+    def next_showcase_event(self, now: datetime) -> ICSEvent | None:
+        return next(
+            (event for event in self.showcase if event.date_end > now),
+            None,
+        )
 
 
 class ICSConfig(MetricConfig[ICSMetric], frozen=True):
@@ -75,6 +88,7 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
     async def _load_from_url(
         http: aiohttp.ClientSession,
         cal: ICSCalendar,
+        now: datetime,
     ) -> list[Event]:
         loop = asyncio.get_event_loop()
 
@@ -85,8 +99,8 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
             executor,
             lambda: events(
                 string_content=data,
-                start=datetime.now(),
-                end=datetime.now() + timedelta(days=365),
+                start=datetime(now.year, 1, 1, tzinfo=now.tzinfo),
+                end=now + timedelta(days=365),
                 strict=True,
             ),
         )
@@ -98,21 +112,20 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
     async def load(self, http: aiohttp.ClientSession) -> ICSMetric:
         tz = ZoneInfo(self.timezone)
         now = datetime.now(tz)
-        events = []
 
         parsed_calendars = await asyncio.gather(
-            *(self._load_from_url(http, cal) for cal in self.calendars)
+            *(self._load_from_url(http, cal, now) for cal in self.calendars)
         )
 
-        for calendar, lib_events in zip(self.calendars, parsed_calendars):
-            events += [
-                event
-                for event in map(
-                    lambda e: ICSEvent.from_lib(e, calendar, tz),
-                    lib_events,
-                )
-                if now <= event.date_end
-            ]
+        all_events = [
+            event
+            for calendar, lib_events in zip(self.calendars, parsed_calendars)
+            for event in map(lambda e: ICSEvent.from_lib(e, calendar, tz), lib_events)
+        ]
 
-        events.sort(key=lambda e: e.date_start)
-        return ICSMetric(events=events)
+        all_events.sort(key=lambda e: e.date_start)
+
+        return ICSMetric(
+            upcoming=[event for event in all_events if now <= event.date_end],
+            showcase=[event for event in all_events if event.showcase],
+        )

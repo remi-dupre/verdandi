@@ -39,7 +39,7 @@ class Calendar3x4(Widget):
         today = date.today()
         events_per_day = {}
 
-        for event in ics.events:
+        for event in ics.upcoming:
             date_curr = event.date_start.date()
             date_end = (event.date_end - timedelta(seconds=1)).date()
 

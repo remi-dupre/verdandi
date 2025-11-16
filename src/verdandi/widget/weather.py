@@ -139,7 +139,7 @@ class WeatherRecap3x2(Widget):
         minutes_offset = (self.width() - 28) * curr_time.minute // (24 * 60)
 
         # If minutes induce no offset, then there is room to display an extra column
-        displayed_range = 25 if minutes_offset < 4 else 24
+        displayed_range = 25 if minutes_offset == 0 else 24
 
         for i in range(0, displayed_range, 2):
             hour = first_hour + i
