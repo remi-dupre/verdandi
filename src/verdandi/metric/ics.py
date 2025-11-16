@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 LABEL_SHOWCASE = "verdandi:showcase"
+LABEL_IGNORE = "verdandi:ignore"
 
 
 class ICSCalendar(BaseModel, frozen=True):
@@ -30,6 +31,7 @@ class ICSEvent(BaseModel):
     date_start: AwareDatetime
     date_end: AwareDatetime
     showcase: bool
+    ignore: bool
 
     @classmethod
     def from_lib(
@@ -57,6 +59,7 @@ class ICSEvent(BaseModel):
         date_start = date_start.astimezone(tz)
         date_end = date_end.astimezone(tz)
         showcase = LABEL_SHOWCASE in (event.description or "")
+        ignore = LABEL_IGNORE in (event.description or "")
 
         return cls(
             summary=event.summary or "",
@@ -64,6 +67,7 @@ class ICSEvent(BaseModel):
             date_start=date_start,
             date_end=date_end,
             showcase=showcase,
+            ignore=ignore,
         )
 
 
@@ -121,6 +125,7 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
             event
             for calendar, lib_events in zip(self.calendars, parsed_calendars)
             for event in map(lambda e: ICSEvent.from_lib(e, calendar, tz), lib_events)
+            if not event.ignore
         ]
 
         all_events.sort(key=lambda e: e.date_start)
