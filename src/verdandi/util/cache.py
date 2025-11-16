@@ -1,11 +1,10 @@
-from asyncio import Event
-from datetime import timedelta, datetime
 import functools
 import logging
-from typing import Awaitable, Callable
+from asyncio import Event
+from datetime import datetime, timedelta
+from typing import Any, Awaitable, Callable
 
 from pydantic import BaseModel
-
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -34,42 +33,45 @@ def async_time_cache[**P, R](
             cache_key = (*args, KWD_MARK, *sorted(kwargs.items()))
             now = datetime.now()
 
+            # Extract stores from wrapped object
+            cache_store: dict[Any, CacheSlot] = wrapper.cache_store  # ty: ignore[unresolved-attribute]
+
+            cache_compute_events: dict[Any, Event] = wrapper.cache_compute_events  # ty: ignore[unresolved-attribute]
+
             # Cleanup all expired keys
             expired_keys = [
-                key
-                for key, slot in wrapper.cache_store.items()
-                if slot.expiration < now
+                key for key, slot in cache_store.items() if slot.expiration < now
             ]
 
             for key in expired_keys:
-                del wrapper.cache_store[key]
+                del cache_store[key]
 
             # If a compute event has been created for this key, wait for the
             # computation to finish and return the resulting cache key.
-            if compute_event := wrapper.cache_compute_events.get(cache_key):
+            if compute_event := cache_compute_events.get(cache_key):
                 await compute_event.wait()
-                return wrapper.cache_store[cache_key].value
+                return cache_store[cache_key].value
 
             # Create a new compute event (which ensures no concurent call will
             # happen)
             compute_event = Event()
-            wrapper.cache_compute_events[cache_key] = compute_event
+            cache_compute_events[cache_key] = compute_event
 
             # Fetch and update cache
-            cache_slot: CacheSlot | None = wrapper.cache_store.get(cache_key)
+            cache_slot: CacheSlot | None = cache_store.get(cache_key)
 
             if cache_slot is None or cache_slot.expiration < now:
                 value = await func(*args, **kwargs)
                 cache_slot = CacheSlot(expiration=now + persistance, value=value)
-                wrapper.cache_store[cache_key] = cache_slot
+                cache_store[cache_key] = cache_slot
 
             # Notify the end of the event and clean it up
             compute_event.set()
-            del wrapper.cache_compute_events[cache_key]
+            del cache_compute_events[cache_key]
             return cache_slot.value
 
-        wrapper.cache_store = {}
-        wrapper.cache_compute_events = {}
+        wrapper.cache_store: dict[Any, CacheSlot] = {}
+        wrapper.cache_compute_events: dict[Any, Event] = {}
         return wrapper
 
     return decorator

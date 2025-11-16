@@ -1,5 +1,6 @@
 import os
 from typing import Annotated, Union, Literal
+from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field, AnyHttpUrl
@@ -28,12 +29,9 @@ class ApiConfiguration(BaseModel):
     widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]
 
     @classmethod
-    def load(cls, path: str | None = None) -> "ApiConfiguration":
+    def load(cls, path: str | Path | None = None) -> "ApiConfiguration":
         with open(path or CONFIGURATION_PATH) as file:
-            data = yaml.load(
-                file,
-                Loader=yaml.CSafeLoader,  # ty: ignore[possibly-unbound-attribute]
-            )
+            data = yaml.load(file, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
 
         return cls(**data)
 

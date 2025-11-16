@@ -58,6 +58,7 @@ class WeatherCode(Enum):
 
 
 class HourlyData(BaseModel):
+    time: datetime
     temperature: float
     weather_code: WeatherCode
     rain_probability: float
@@ -80,6 +81,29 @@ class WeatherMetric(Metric):
     sunset: time
     daily: list[DailyData] = conlist(DailyData, min_length=7, max_length=7)
     hourly: list[HourlyData] = conlist(HourlyData, min_length=49, max_length=49)
+
+    def interpolate_temperature_at(self, dt: datetime) -> float:
+        """
+        Compute interpolated temperature at a given time.
+        """
+        first_point = next((pt for pt in self.hourly[::-1] if pt.time <= dt), None)
+        last_point = next((pt for pt in self.hourly if pt.time > dt), None)
+
+        if first_point is None:
+            assert last_point is not None
+            return last_point.temperature
+
+        if last_point is None:
+            assert first_point is not None
+            return first_point.temperature
+
+        interval = (last_point.time - first_point.time).total_seconds()
+        progress = (dt - first_point.time).total_seconds() / interval
+
+        return (
+            first_point.temperature * (1.0 - progress)
+            + last_point.temperature * progress
+        )
 
 
 class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
@@ -141,11 +165,13 @@ class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
 
         hourly = [
             HourlyData(
+                time=datetime.fromisoformat(time),
                 temperature=temperature,
                 weather_code=WeatherCode.from_wmo_mapping(wmo_code),
                 rain_probability=rain_probability,
             )
-            for (temperature, wmo_code, rain_probability) in zip(
+            for (time, temperature, wmo_code, rain_probability) in zip(
+                data["hourly"]["time"],
                 data["hourly"]["temperature_2m"],
                 data["hourly"]["weather_code"],
                 data["hourly"]["precipitation_probability"],

@@ -13,15 +13,15 @@ from verdandi.util.common import executor
 
 class Widget(ABC, BaseModel):
     name: ClassVar[str]
-    size: ClassVar[tuple[int]]
+    size: ClassVar[tuple[int, int]]
 
-    @property
-    def width(self) -> int:
-        return 133 * self.size[0]
+    @classmethod
+    def width(cls) -> int:
+        return 133 * cls.size[0]
 
-    @property
-    def height(self) -> int:
-        return 120 * self.size[1]
+    @classmethod
+    def height(cls) -> int:
+        return 120 * cls.size[1]
 
     @classmethod
     @abstractmethod
@@ -33,7 +33,7 @@ class Widget(ABC, BaseModel):
         raise NotImplementedError
 
     def _init_and_draw(self, **kwargs):
-        res = Image.new(mode="1", size=(self.width, self.height), color=1)
+        res = Image.new(mode="1", size=(self.width(), self.height()), color=1)
         draw = ImageDraw(res)
         self.draw(draw, **kwargs)
         return res

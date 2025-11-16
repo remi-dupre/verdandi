@@ -50,7 +50,7 @@ async def client(base_url: str, monkeypatch) -> AsyncGenerator[AsyncClient]:
 
 
 @pytest.fixture
-async def http() -> aiohttp.ClientSession:
+async def http() -> AsyncGenerator[aiohttp.ClientSession]:
     async with aiohttp.ClientSession() as http:
         with aioresponses() as mock:
             mock.get(

@@ -43,4 +43,4 @@ class Countdown2x1(Widget):
 
         draw_text(draw, (MARGIN, 1), Font.LARGE_BOLD, self.title)
         draw_text(draw, (MARGIN, 25), Font.LARGE, text)
-        draw_progress(draw, (20, 60, self.width - 20, 90), progress)
+        draw_progress(draw, (20, 60, self.width() - 20, 90), progress)

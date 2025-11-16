@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from datetime import date, datetime, timedelta
-from functools import cache
 from typing import ClassVar
 from zoneinfo import ZoneInfo
 
@@ -35,6 +34,7 @@ class ICSEvent(BaseModel):
         calendar: ICSCalendar,
         tz: ZoneInfo,
     ) -> "ICSEvent":
+        assert event.start is not None and event.end is not None  # TODO: when ???
         date_start = event.start
         date_end = event.end
 

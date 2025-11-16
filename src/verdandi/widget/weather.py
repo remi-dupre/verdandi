@@ -88,6 +88,8 @@ class WeatherRecap3x2(Widget):
             weather.sunset.isoformat("minutes"),
         )
 
+        # == Draw curve
+
         # Find temperature bounds for the next two days
         temp_min = min(
             min(x.temperature for x in weather.hourly[:49]),
@@ -100,18 +102,10 @@ class WeatherRecap3x2(Widget):
         )
 
         # Section: hourly
-        def temp_func(val: float) -> float:
-            hour = curr_time.hour + val * 24.0
-            prev_val = weather.hourly[int(hour)].temperature
-
-            if hour < 48.0:
-                next_val = weather.hourly[int(hour) + 1].temperature
-            else:
-                next_val = prev_val
-
-            alpha = hour % 1.0
-            val = next_val * alpha + prev_val * (1.0 - alpha)
-            return 0.1 + 0.9 * (val - temp_min) / (temp_max - temp_min)
+        def temp_func(x: float) -> float:
+            dt = curr_dt + timedelta(hours=24.0 * x)
+            y = weather.interpolate_temperature_at(dt)
+            return 0.1 + 0.9 * (y - temp_min) / (temp_max - temp_min)
 
         # Shade the curve between sunset & surise
         shade_day = 17
@@ -128,18 +122,29 @@ class WeatherRecap3x2(Widget):
         while curr_dt >= sun_events[0][0]:
             sun_events.pop(0)
 
-        density = [
+        shade_parts = [
             ((dt - curr_dt).total_seconds() / (24.0 * 3600.0), density)
             for dt, density in sun_events[:2]
         ]
 
-        density.append((1.0, shade_day + shade_night - density[-1][1]))
-        draw_curve(draw, (14, 90, self.width - 14, 150), temp_func, density)
+        shade_parts.append((1.0, shade_day + shade_night - shade_parts[-1][1]))
+        draw_curve(draw, (14, 90, self.width() - 14, 150), temp_func, shade_parts)
 
-        for i in range(0, 25, 2):
-            x = 14 + (self.width - 28) * i // 24
-            hour = (curr_time.hour + i) % 24
-            draw_text(draw, (x, 160), Font.SMALL, f"{hour:02}h", anchor="ma")
+        # == Draw Table
+
+        # First hour in table representation
+        first_hour = curr_time.hour if curr_time.minute < 30 else curr_time.hour + 1
+
+        # Offset induced by current minutes
+        minutes_offset = (self.width() - 28) * curr_time.minute // (24 * 60)
+
+        # If minutes induce no offset, then there is room to display an extra column
+        displayed_range = 25 if minutes_offset < 4 else 24
+
+        for i in range(0, displayed_range, 2):
+            hour = first_hour + i
+            x = 14 + minutes_offset + (self.width() - 28) * i // 24
+            draw_text(draw, (x, 160), Font.SMALL, f"{(hour % 24):02}h", anchor="ma")
 
             draw_text(
                 draw,
@@ -210,4 +215,4 @@ class WeatherWeek3x1(Widget):
                 f"{round(day.temperature_min)}°-{round(day.temperature_max)}°",
             )
 
-        draw.point([(x, MARGIN + 48) for x in range(21, self.width - 20, 3)])
+        draw.point([(x, MARGIN + 48) for x in range(21, self.width() - 20, 3)])

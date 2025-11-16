@@ -31,7 +31,7 @@ class Calendar3x4(Widget):
     def draw(self, draw: ImageDraw, ics: ICSMetric):
         draw.point(
             points_for_shade(
-                (MARGIN, MARGIN, MARGIN + 17, self.height - 2 * MARGIN),
+                (MARGIN, MARGIN, MARGIN + 17, self.height() - 2 * MARGIN),
                 12,
             )
         )
@@ -51,7 +51,7 @@ class Calendar3x4(Widget):
         prev_day = None
 
         for day, events in iter(events_per_day.items()):
-            if y_pos > self.height - (24 + MARGIN_DAY):
+            if y_pos > self.height() - (24 + MARGIN_DAY):
                 break
 
             if day == today:
@@ -81,13 +81,13 @@ class Calendar3x4(Widget):
             )
 
             draw.point(
-                [(x, y_pos) for x in range(28 + title_width, self.width - MARGIN, 2)]
+                [(x, y_pos) for x in range(28 + title_width, self.width() - MARGIN, 2)]
             )
 
             y_pos += 12
 
             for event in events:
-                if y_pos > self.height - 24:
+                if y_pos > self.height() - 24:
                     break
 
                 time_start = max(
@@ -115,7 +115,7 @@ class Calendar3x4(Widget):
                 if time_str == "00h-00h":
                     text_area = TextArea(
                         draw=draw,
-                        bounds=(28, y_pos, self.width - MARGIN, None),
+                        bounds=(28, y_pos, self.width() - MARGIN, None),
                         line_height=22,
                     )
                 else:
@@ -127,7 +127,7 @@ class Calendar3x4(Widget):
 
                     text_area = TextArea(
                         draw=draw,
-                        bounds=(28, y_pos, self.width - MARGIN, None),
+                        bounds=(28, y_pos, self.width() - MARGIN, None),
                         line_height=22,
                         cursor=(90, 0),
                     )

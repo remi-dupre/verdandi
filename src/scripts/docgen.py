@@ -1,15 +1,16 @@
 import asyncio
 import base64
 
+import aiohttp
 import yaml
 
 from verdandi.util.image import image_to_bytes
 from verdandi.widget import ALL_WIDGETS
 
 
-async def main():
+async def docgen(http: aiohttp.ClientSession):
     for widget in ALL_WIDGETS:
-        img = await widget.example().render()
+        img = await widget.example().render(http)
         img_data = image_to_bytes(img)
         b64_data = base64.b64encode(img_data).decode("utf8")
 
@@ -27,8 +28,8 @@ async def main():
         print("| | value |")
         print("|---|---|")
         print(f"| **name** | {widget.name} |")
-        print(f"| **width** | {widget.width} |")
-        print(f"| **height** | {widget.height} |")
+        print(f"| **width** | {widget.width()} |")
+        print(f"| **height** | {widget.height()} |")
         print()
         print("### Configuration Example")
         print()
@@ -38,11 +39,18 @@ async def main():
             yaml.dump(
                 example_config,
                 sort_keys=False,
-                Dumper=yaml.CSafeDumper,  # ty: ignore[possibly-unbound-attribute]
+                Dumper=getattr(yaml, "CSafeDumper", yaml.SafeDumper),
             )
         )
 
         print("```")
+
+
+async def main():
+    connector = aiohttp.TCPConnector(ssl=False)  # todo: is this a nixos issue?
+
+    async with aiohttp.ClientSession(connector=connector) as http:
+        await docgen(http)
 
 
 def run():
