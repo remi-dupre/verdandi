@@ -1,4 +1,5 @@
 import asyncio
+import enum
 import logging
 from datetime import date, datetime, timedelta
 from typing import ClassVar
@@ -16,8 +17,10 @@ from verdandi.util.common import executor
 logger = logging.getLogger(__name__)
 
 
-LABEL_SHOWCASE = "verdandi:showcase"
-LABEL_IGNORE = "verdandi:ignore"
+@enum.unique
+class Label(enum.Enum):
+    SHOWCASE = "showcase"
+    IGNORE = "ignore"
 
 
 class ICSCalendar(BaseModel, frozen=True):
@@ -30,8 +33,7 @@ class ICSEvent(BaseModel):
     calendar: ICSCalendar
     date_start: AwareDatetime
     date_end: AwareDatetime
-    showcase: bool
-    ignore: bool
+    labels: set[Label]
 
     @classmethod
     def from_lib(
@@ -58,16 +60,19 @@ class ICSEvent(BaseModel):
 
         date_start = date_start.astimezone(tz)
         date_end = date_end.astimezone(tz)
-        showcase = LABEL_SHOWCASE in (event.description or "")
-        ignore = LABEL_IGNORE in (event.description or "")
+
+        labels = {
+            label
+            for label in Label
+            if f"verdandi:{label.value}" in (event.description or "").lower()
+        }
 
         return cls(
             summary=event.summary or "",
             calendar=calendar,
             date_start=date_start,
             date_end=date_end,
-            showcase=showcase,
-            ignore=ignore,
+            labels=labels,
         )
 
 
@@ -125,12 +130,12 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
             event
             for calendar, lib_events in zip(self.calendars, parsed_calendars)
             for event in map(lambda e: ICSEvent.from_lib(e, calendar, tz), lib_events)
-            if not event.ignore
+            if Label.IGNORE not in event.labels
         ]
 
         all_events.sort(key=lambda e: e.date_start)
 
         return ICSMetric(
             upcoming=[event for event in all_events if now <= event.date_end],
-            showcase=[event for event in all_events if event.showcase],
+            showcase=[event for event in all_events if Label.SHOWCASE in event.labels],
         )

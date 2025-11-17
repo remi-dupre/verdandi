@@ -7,7 +7,8 @@ from verdandi.util.draw import points_for_shade
 from verdandi.util.date import weekday_humanized, month_humanized
 from verdandi.metric.ics import ICSMetric, ICSConfig
 from verdandi.component.text import Font, draw_text, TextArea, size_text
-from verdandi.util.text import keep_ascii
+from verdandi.component.icon import draw_icon
+from verdandi.util.text import keep_ascii, guess_icon
 
 MARGIN = 3
 MARGIN_LINES = 4
@@ -112,25 +113,27 @@ class Calendar3x4(Widget):
                     time_start.strftime("%Hh%M") + "-" + time_end.strftime("%Hh%M")
                 ).replace("h00", "h")
 
-                if time_str == "00h-00h":
-                    text_area = TextArea(
-                        draw=draw,
-                        bounds=(28, y_pos, self.width() - MARGIN, None),
-                        line_height=22,
-                    )
-                else:
+                # Initial position for the text area
+                initial_cursor_x = 0
+
+                if time_str != "00h-00h":
+                    initial_cursor_x += 94
                     draw_text(draw, (73, y_pos + 7), Font.MEDIUM, time_str, anchor="mt")
 
                     draw.rounded_rectangle(
                         (28, y_pos + 3, 28 + 89, y_pos + 19), radius=3
                     )
 
-                    text_area = TextArea(
-                        draw=draw,
-                        bounds=(28, y_pos, self.width() - MARGIN, None),
-                        line_height=22,
-                        cursor=(90, 0),
-                    )
+                if icon := guess_icon(event.summary):
+                    draw_icon(draw, (28 + initial_cursor_x, y_pos + 3), "small-" + icon)
+                    initial_cursor_x += 18
+
+                text_area = TextArea(
+                    draw=draw,
+                    bounds=(28, y_pos, self.width() - MARGIN, None),
+                    line_height=22,
+                    cursor=(initial_cursor_x, 0),
+                )
 
                 text_area.draw_text(Font.XMEDIUM, keep_ascii(event.summary))
 

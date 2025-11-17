@@ -105,22 +105,21 @@ class TextArea(BaseModel, arbitrary_types_allowed=True):
         return True
 
     def draw_text(self, font: Font, text: str, /, breakable: bool = True):
+        space_size = size_text(self.draw, font, " ")
+
         if breakable:
             unbreakable_chunks = text.split()
         else:
             unbreakable_chunks = [text]
 
         for chunk in unbreakable_chunks:
-            if self.cursor[0] != 0:
-                space_size = size_text(self.draw, font, " ")
-
-                self.cursor = (
-                    min(self.cursor[0] + space_size, self.bounds_width),
-                    self.cursor[1],
-                )
-
             if not self._try_draw_on_line(font, chunk):
                 self.cursor = (0, self.cursor[1] + self.line_height)
 
                 if self.bounds[3] is None or self.bounds[3] < self.cursor[1]:
                     self._try_draw_on_line(font, chunk)
+
+            self.cursor = (
+                min(self.cursor[0] + space_size, self.bounds_width),
+                self.cursor[1],
+            )
