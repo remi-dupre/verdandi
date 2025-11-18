@@ -1,6 +1,5 @@
 import logging
 import asyncio
-from functools import cache
 from typing import ClassVar
 from datetime import timedelta
 

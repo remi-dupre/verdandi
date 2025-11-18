@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from verdandi.metric.abs_metric import MetricConfig
 from verdandi.util.common import executor
+from verdandi.util.color import CW
 
 
 class Widget(ABC, BaseModel):
@@ -33,7 +34,7 @@ class Widget(ABC, BaseModel):
         raise NotImplementedError
 
     def _init_and_draw(self, **kwargs):
-        res = Image.new(mode="1", size=(self.width(), self.height()), color=1)
+        res = Image.new(mode="L", size=(self.width(), self.height()), color=CW)
         draw = ImageDraw(res)
         self.draw(draw, **kwargs)
         return res

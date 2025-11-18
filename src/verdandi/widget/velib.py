@@ -5,6 +5,11 @@ from verdandi.component.gauge import draw_gauge
 from verdandi.component.text import draw_text, Font
 from verdandi.component.icon import draw_icon
 from verdandi.metric.velib import VelibMetric, VelibConfig
+from verdandi.util.draw import ShadeMatrix, ShadeUniform
+from verdandi.util.color import CW, CL, CD
+
+FILL_MECHANICAL = ShadeMatrix([CD, CL], [CL, CD])
+FILL_ELECTRIC = ShadeMatrix([CW, CL], [CL, CW])
 
 
 class Velib1x1(Widget):
@@ -25,9 +30,9 @@ class Velib1x1(Widget):
             50,
             38,
             [
-                (velib.mechanical / velib.capacity, 2),
-                ((velib.mechanical + velib.electric) / velib.capacity, 5),
-                (1.0, None),
+                (velib.mechanical / velib.capacity, FILL_MECHANICAL),
+                ((velib.mechanical + velib.electric) / velib.capacity, FILL_ELECTRIC),
+                (1.0, ShadeUniform(CW)),
             ],
         )
 

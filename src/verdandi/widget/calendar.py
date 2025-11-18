@@ -3,16 +3,25 @@ from datetime import timedelta, date, datetime, time
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.widget.abs_widget import Widget
-from verdandi.util.draw import points_for_shade
+from verdandi.util.draw import ShadeMatrix
 from verdandi.util.date import weekday_humanized, month_humanized
 from verdandi.metric.ics import ICSMetric, ICSConfig
 from verdandi.component.text import Font, draw_text, TextArea, size_text
 from verdandi.component.icon import draw_icon
 from verdandi.util.text import keep_ascii, guess_icon
+from verdandi.util.color import CL, CW
 
 MARGIN = 3
 MARGIN_LINES = 4
 MARGIN_DAY = 8
+
+
+SHADE_TIMELINE_BACKGROUND = ShadeMatrix(
+    [CL, CW],
+    [CW, CW],
+    [CW, CL],
+    [CW, CW],
+)
 
 
 class Calendar3x4(Widget):
@@ -30,11 +39,9 @@ class Calendar3x4(Widget):
         )
 
     def draw(self, draw: ImageDraw, ics: ICSMetric):
-        draw.point(
-            points_for_shade(
-                (MARGIN, MARGIN, MARGIN + 17, self.height() - 2 * MARGIN),
-                12,
-            )
+        SHADE_TIMELINE_BACKGROUND.fill_rect(
+            draw,
+            (MARGIN, MARGIN, MARGIN + 17, self.height() - 2 * MARGIN),
         )
 
         today = date.today()

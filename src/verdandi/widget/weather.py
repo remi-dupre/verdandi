@@ -9,9 +9,26 @@ from verdandi.component.icon import draw_icon
 from verdandi.component.curve import draw_curve
 from verdandi.metric.weather import WeatherMetric, WeatherConfig
 from verdandi.util.date import weekday_humanized
+from verdandi.util.draw import ShadeMatrix
+from verdandi.util.color import CL, CW, CD
 
 
 MARGIN = 6
+
+
+FILL_DAY = ShadeMatrix(
+    [CW, CW, CL, CW],
+    [CW, CW, CW, CW],
+    [CL, CW, CW, CW],
+    [CW, CW, CW, CW],
+)
+
+FILL_NIGHT = ShadeMatrix(
+    [CD, CW, CL, CW],
+    [CW, CW, CW, CW],
+    [CL, CW, CD, CW],
+    [CW, CW, CW, CW],
+)
 
 
 class WeatherRecap3x2(Widget):
@@ -108,26 +125,30 @@ class WeatherRecap3x2(Widget):
             return 0.1 + 0.9 * (y - temp_min) / (temp_max - temp_min)
 
         # Shade the curve between sunset & surise
-        shade_day = 17
-        shade_night = 5
         next_date = curr_date + timedelta(days=1)
 
         sun_events = [
-            (datetime.combine(curr_date, weather.sunrise), shade_night),
-            (datetime.combine(curr_date, weather.sunset), shade_day),
-            (datetime.combine(next_date, weather.sunrise), shade_night),
-            (datetime.combine(next_date, weather.sunset), shade_day),
+            (datetime.combine(curr_date, weather.sunrise), FILL_NIGHT),
+            (datetime.combine(curr_date, weather.sunset), FILL_DAY),
+            (datetime.combine(next_date, weather.sunrise), FILL_NIGHT),
+            (datetime.combine(next_date, weather.sunset), FILL_DAY),
         ]
 
         while curr_dt >= sun_events[0][0]:
             sun_events.pop(0)
 
         shade_parts = [
-            ((dt - curr_dt).total_seconds() / (24.0 * 3600.0), density)
-            for dt, density in sun_events[:2]
+            ((dt - curr_dt).total_seconds() / (24.0 * 3600.0), shade)
+            for dt, shade in sun_events[:2]
         ]
 
-        shade_parts.append((1.0, shade_day + shade_night - shade_parts[-1][1]))
+        shade_parts.append(
+            (
+                1.0,
+                FILL_DAY if shade_parts[-1][1] == FILL_NIGHT else FILL_NIGHT,
+            )
+        )
+
         draw_curve(draw, (14, 90, self.width() - 14, 150), temp_func, shade_parts)
 
         # == Draw Table

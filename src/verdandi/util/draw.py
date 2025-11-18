@@ -1,12 +1,10 @@
+from abc import ABC, abstractmethod
 import math
+from typing import Iterable
+from collections import defaultdict
 
 from PIL import Image
-
-
-def _shade_filter(xy: tuple[int, int], spacing: int) -> bool:
-    x, y = xy
-    u, v = 7, 11
-    return (u * x + v * y) % spacing == 0
+from PIL.ImageDraw import ImageDraw
 
 
 def point_on_circle(
@@ -34,47 +32,79 @@ def xy_to_bounds(
     return ((x_min, x_max), (y_min, y_max))
 
 
-def _pattern(x: int, y: int, spacing: int) -> bool:
-    return (x + y * 8) % spacing == 0
+class AbcShade(ABC):
+    @abstractmethod
+    def color_at(self, xy: tuple[int, int]) -> int:
+        raise NotImplementedError
+
+    def draw_points(self, draw: ImageDraw, points: Iterable[tuple[int, int]]):
+        """
+        Draw a set of points with this shade.
+        """
+        points_for_color = defaultdict(list)
+        points = list(points)
+
+        for xy in points:
+            color = self.color_at(xy)
+            points_for_color[color].append(xy)
+
+        for color, points in points_for_color.items():
+            draw.point(points, fill=color)
+
+    def fill_rect(self, draw: ImageDraw, xy: tuple[int, int, int, int]):
+        """
+        Fill a full rectangle with this shade.
+        """
+        (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
+
+        self.draw_points(
+            draw,
+            ((x, y) for x in range(x_min, x_max + 1) for y in range(y_min, y_max + 1)),
+        )
+
+    def fill_area(self, img: Image.Image, xy: tuple[int, int]):
+        """
+        Fill the area around input point with this shade.
+        """
+        back_color = img.getpixel(xy)
+        todo = [xy]
+        seen = {xy}
+
+        while todo:
+            x, y = todo.pop()
+
+            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                neighbour = (x + dx, y + dy)
+
+                if neighbour not in seen and img.getpixel(neighbour) == back_color:
+                    todo.append(neighbour)
+                    seen.add(neighbour)
+
+        self.draw_points(ImageDraw(img), seen)
 
 
-def fill_with_shade(img: Image.Image, xy: tuple[int, int], spacing: int = 2):
+class ShadeUniform(AbcShade):
     """
-    Fill the area around input point with a shade.
-    """
-    todo = [xy]
-    seen = {xy}
-
-    while todo:
-        x, y = todo.pop()
-
-        if img.getpixel((x, y)) == 0:
-            continue
-
-        if _shade_filter((x, y), spacing):
-            img.putpixel((x, y), 0)
-
-        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-            neighbour = (x + dx, y + dy)
-
-            if neighbour not in seen:
-                todo.append(neighbour)
-                seen.add(neighbour)
-
-
-def points_for_shade(
-    xy: tuple[int, int, int, int],
-    spacing: int = 2,
-) -> list[tuple[int, int]]:
-    """
-    Return a list of points to color to asign a rectangle with a shade of gray.
+    A uniform color.
     """
 
-    (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
+    def __init__(self, color: int):
+        self.color = color
 
-    return [
-        (x, y)
-        for x in range(x_min, x_max + 1)
-        for y in range(y_min, y_max + 1)
-        if _shade_filter((x, y), spacing)
-    ]
+    def color_at(self, xy: tuple[int, int]) -> int:
+        return self.color
+
+
+class ShadeMatrix(AbcShade):
+    """
+    A repeating pattern.
+    """
+
+    def __init__(self, *matrix: list[int]):
+        self.matrix = list(matrix)
+
+    def color_at(self, xy: tuple[int, int]) -> int:
+        x, y = xy
+        row = y % len(self.matrix)
+        col = x % len(self.matrix[row])
+        return self.matrix[row][col]

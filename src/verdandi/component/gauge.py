@@ -1,10 +1,7 @@
 from PIL.ImageDraw import ImageDraw
 
-from verdandi.util.draw import (
-    point_on_circle,
-    fill_with_shade,
-)
-
+from verdandi.util.draw import AbcShade, point_on_circle
+from verdandi.util.color import CW
 
 ANGLE_START = 135
 ANGLE_END = 405
@@ -15,7 +12,7 @@ def draw_gauge(
     xy: tuple[int, int],
     radius_ext: int,
     radius_inn: int,
-    sections: list[tuple[float, int | None]] = [(1.0, None)],
+    sections: list[tuple[float, AbcShade | None]] = [(1.0, None)],
 ):
     assert radius_ext > radius_inn
 
@@ -31,21 +28,20 @@ def draw_gauge(
 
     for progress, shade in sections:
         curr_angle = ANGLE_START + (ANGLE_END - ANGLE_START) * progress
-        draw.pieslice(bounds_ext, prev_angle, curr_angle, width=2)
+        draw.pieslice(bounds_ext, prev_angle, curr_angle, width=1)
 
         if shade is not None:
-            fill_with_shade(
+            shade.fill_area(
                 draw._image,
                 point_on_circle(
                     xy,
                     (radius_inn + radius_ext) // 2,
                     (prev_angle + curr_angle) // 2,
                 ),
-                shade,
             )
 
         prev_angle = curr_angle
 
     # Erase wheel spokes and draw inner arc
-    draw.ellipse(bounds_inn, fill=1)
+    draw.ellipse(bounds_inn, fill=CW)
     draw.arc(bounds_inn, ANGLE_START, ANGLE_END, width=2)

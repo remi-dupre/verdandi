@@ -9,6 +9,7 @@ from PIL import Image
 from fastapi import FastAPI, Response, Path, Query
 from pydantic import BaseModel, AnyHttpUrl
 
+from verdandi.util.color import CW
 from verdandi.state import DepState
 from verdandi.configuration import configuration
 from verdandi.util.logging import async_log_duration
@@ -37,7 +38,7 @@ async def _generate_canvas():
         )
 
     # Paste rendered widgets to appropriate locations in a canvas
-    img = Image.new(mode="1", size=configuration.size, color=1)
+    img = Image.new(mode="L", size=configuration.size, color=CW)
 
     for widget, widget_img in zip(configuration.widgets, widget_imgs):
         img.paste(widget_img, widget.position)

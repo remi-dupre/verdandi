@@ -10,12 +10,20 @@ from verdandi.component.text import Font, draw_text
 from verdandi.metric.ics import ICSConfig, ICSMetric
 from verdandi.util.text import guess_icon, keep_ascii
 from verdandi.widget.abs_widget import Widget
+from verdandi.util.draw import ShadeMatrix
+from verdandi.util.color import CW, CL
 
 MARGIN = 10
 MARGIN_LINES = 4
 MARGIN_DAY = 8
 
 logger = logging.getLogger(__name__)
+
+
+SHADE_PROGRESS = ShadeMatrix(
+    [CL, CW],
+    [CW, CL],
+)
 
 
 class Showcase2x1(Widget):
@@ -46,7 +54,13 @@ class Showcase2x1(Widget):
 
         bar_x_start = 20
         bar_x_end = self.width() - 20
-        draw_progress(draw, (bar_x_start, 78, bar_x_end, 95), progress)
+
+        draw_progress(
+            draw,
+            (bar_x_start, 79, bar_x_end, 95),
+            progress,
+            fill=SHADE_PROGRESS,
+        )
 
         for i, month in enumerate("JFMAMJJASOND"):
             text_x = bar_x_start + i * (bar_x_end - bar_x_start) // 12
