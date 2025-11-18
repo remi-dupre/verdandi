@@ -1,5 +1,6 @@
 from datetime import timedelta, date, datetime, time
 
+from PIL import Image
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.widget.abs_widget import Widget
@@ -9,11 +10,21 @@ from verdandi.metric.ics import ICSMetric, ICSConfig
 from verdandi.component.text import Font, draw_text, TextArea, size_text
 from verdandi.component.icon import draw_icon
 from verdandi.util.text import keep_ascii, guess_icon
-from verdandi.util.color import CL, CW
+from verdandi.util.common import DIR_DATA
+from verdandi.util.color import CL, CW, CD
+from verdandi.util.draw import apply_mask_at
 
 MARGIN = 3
 MARGIN_LINES = 4
 MARGIN_DAY = 8
+
+DAY_SEPARATOR = Image.open(DIR_DATA / "ui" / "calendar-day-separator.png").convert(
+    mode="L"
+)
+
+MONTH_SEPARATOR_MASK = Image.open(
+    DIR_DATA / "ui" / "calendar-month-separator-mask.png"
+).convert(mode="L")
 
 
 SHADE_TIMELINE_BACKGROUND = ShadeMatrix(
@@ -80,16 +91,36 @@ class Calendar3x4(Widget):
             else:
                 title_width = 0
 
+            # == Draw elipsis separators
+
+            if prev_day is not None:
+                if day.month != prev_day.month:
+                    apply_mask_at(
+                        draw,
+                        MONTH_SEPARATOR_MASK,
+                        (MARGIN, y_pos - MONTH_SEPARATOR_MASK.height - 4),
+                    )
+                elif day - prev_day > timedelta(days=1):
+                    draw._image.paste(
+                        DAY_SEPARATOR,
+                        (MARGIN, y_pos - DAY_SEPARATOR.height - 9),
+                    )
+
+            # == Draw day separator
+
+            draw.point(
+                [(x, y_pos) for x in range(28 + title_width, self.width() - MARGIN, 2)],
+                fill=CD,
+            )
+
+            # == Draw day number
+
             draw_text(
                 draw,
                 (MARGIN + 9, y_pos),
                 Font.MEDIUM,
                 str(day.day),
                 anchor="mm",
-            )
-
-            draw.point(
-                [(x, y_pos) for x in range(28 + title_width, self.width() - MARGIN, 2)]
             )
 
             y_pos += 12

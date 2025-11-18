@@ -3,21 +3,8 @@ import math
 from typing import Iterable
 from collections import defaultdict
 
-from PIL import Image
+from PIL import Image, ImageChops
 from PIL.ImageDraw import ImageDraw
-
-
-def point_on_circle(
-    center: tuple[int, int],
-    radius: int,
-    angle: float,
-) -> tuple[int, int]:
-    c_x, c_y = center
-
-    return (
-        c_x + int(radius * math.cos(math.pi * angle / 180.0)),
-        c_y + int(radius * math.sin(math.pi * angle / 180.0)),
-    )
 
 
 def xy_to_bounds(
@@ -30,6 +17,40 @@ def xy_to_bounds(
     x_min, x_max = min(xy[0::2]), max(xy[0::2])
     y_min, y_max = min(xy[1::2]), max(xy[1::2])
     return ((x_min, x_max), (y_min, y_max))
+
+
+def point_on_circle(
+    center: tuple[int, int],
+    radius: int,
+    angle: float,
+) -> tuple[int, int]:
+    """
+    Get the coordinates of a point on a circle at a given angle.
+    """
+    c_x, c_y = center
+
+    return (
+        c_x + int(radius * math.cos(math.pi * angle / 180.0)),
+        c_y + int(radius * math.sin(math.pi * angle / 180.0)),
+    )
+
+
+def apply_mask_at(
+    draw: ImageDraw,
+    mask: Image.Image,
+    pos: tuple[int, int],
+):
+    """
+    Apply a mask at given position of the image.
+
+    Black parts of the mask will be replaced with white, white parts of the
+    mask will be left unchanged.
+    """
+    x, y = pos
+    width, height = mask.size
+    cropped = draw._image.crop((x, y, x + width, y + height))
+    cropped = ImageChops.invert(ImageChops.multiply(ImageChops.invert(cropped), mask))
+    draw._image.paste(cropped, pos)
 
 
 class AbcShade(ABC):
