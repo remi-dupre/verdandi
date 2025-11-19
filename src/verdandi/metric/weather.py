@@ -37,6 +37,7 @@ class WeatherCode(Enum):
     @classmethod
     @cache
     def wmo_mapping(cls) -> dict[int, "WeatherCode"]:
+        # TODO: What is the difference between snow shower and snow fall?
         rev_mapping = {
             cls.CLEAR: [0],
             cls.MAINLY_CLEAR: [1],
@@ -47,8 +48,8 @@ class WeatherCode(Enum):
             cls.RAIN_MODERATE: [63, 81],
             cls.RAIN_HEAVY: [65, 67, 82],
             cls.SNOW_FALL_LIGHT: [71],
-            cls.SNOW_FALL_MODERATE: [73, 77],
-            cls.SNOW_FALL_HEAVY: [75],
+            cls.SNOW_FALL_MODERATE: [73, 77, 85],
+            cls.SNOW_FALL_HEAVY: [75, 86],
             cls.THUNDER: [95, 96, 99],
         }
 
