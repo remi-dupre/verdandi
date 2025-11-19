@@ -179,6 +179,7 @@ class Calendar3x4(Widget):
                     Font.MEDIUM,
                     f"- {event.calendar.label}",
                     breakable=False,
+                    color=CD,
                 )
 
                 y_pos += text_area.height + MARGIN_LINES

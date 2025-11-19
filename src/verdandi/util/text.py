@@ -7,6 +7,7 @@ ICON_MAPPING = {
     "beer": ["🍺", "🍻", "🍸", "cocktail", "bière"],
     "coffee": ["☕", "café", "brunch", "goûter"],
     "tablewear": ["🍽️", "dîner", "déjeuner", "repas"],
+    "medical": ["🩸", "💉", "🩺", "🧑🏽‍⚕"],
 }
 
 

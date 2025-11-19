@@ -6,6 +6,7 @@ from PIL import ImageFont
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.util.common import DIR_DATA
+from verdandi.util.color import CB
 
 DIR_FONTS = DIR_DATA / "fonts"
 
@@ -55,9 +56,10 @@ def draw_text(
     xy: tuple[int, int],
     font: Font,
     text: str,
-    anchor="la",
+    anchor: str = "la",
+    color: int = CB,
 ):
-    draw.text(xy, text, font=font.font, fill=0, anchor=anchor)
+    draw.text(xy, text, font=font.font, fill=color, anchor=anchor)
 
 
 def size_text(
@@ -85,7 +87,7 @@ class TextArea(BaseModel, arbitrary_types_allowed=True):
         else:
             return self.cursor[1] + self.line_height
 
-    def _try_draw_on_line(self, font: Font, text: str) -> bool:
+    def _try_draw_on_line(self, font: Font, text: str, color: int) -> bool:
         draw_width = size_text(self.draw, font, text)
 
         if self.bounds_width < self.cursor[0] + draw_width:
@@ -100,11 +102,20 @@ class TextArea(BaseModel, arbitrary_types_allowed=True):
             font,
             text,
             anchor="lm",
+            color=color,
         )
+
         self.cursor = (self.cursor[0] + draw_width, self.cursor[1])
         return True
 
-    def draw_text(self, font: Font, text: str, /, breakable: bool = True):
+    def draw_text(
+        self,
+        font: Font,
+        text: str,
+        /,
+        breakable: bool = True,
+        color: int = CB,
+    ):
         space_size = size_text(self.draw, font, " ")
 
         if breakable:
@@ -113,11 +124,11 @@ class TextArea(BaseModel, arbitrary_types_allowed=True):
             unbreakable_chunks = [text]
 
         for chunk in unbreakable_chunks:
-            if not self._try_draw_on_line(font, chunk):
+            if not self._try_draw_on_line(font, chunk, color):
                 self.cursor = (0, self.cursor[1] + self.line_height)
 
                 if self.bounds[3] is None or self.bounds[3] < self.cursor[1]:
-                    self._try_draw_on_line(font, chunk)
+                    self._try_draw_on_line(font, chunk, color)
 
             self.cursor = (
                 min(self.cursor[0] + space_size, self.bounds_width),

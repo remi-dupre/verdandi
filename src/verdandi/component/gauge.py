@@ -30,7 +30,7 @@ def draw_gauge(
         curr_angle = ANGLE_START + (ANGLE_END - ANGLE_START) * progress
         draw.pieslice(bounds_ext, prev_angle, curr_angle, width=1)
 
-        if shade is not None:
+        if shade is not None and curr_angle > prev_angle:
             shade.fill_area(
                 draw._image,
                 point_on_circle(
