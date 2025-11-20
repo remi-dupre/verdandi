@@ -11,7 +11,7 @@ from pydantic import BaseModel, AnyHttpUrl
 
 from verdandi.util.color import CW
 from verdandi.state import DepState
-from verdandi.configuration import configuration
+from verdandi.configuration import ApiConfiguration
 from verdandi.util.logging import async_log_duration
 from verdandi.util.image import image_to_bytes
 
@@ -28,7 +28,7 @@ app = FastAPI(
 
 
 @async_log_duration(logger, "Canvas generation")
-async def _generate_canvas():
+async def _generate_canvas(configuration: ApiConfiguration):
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
@@ -74,7 +74,12 @@ async def canvas_prepare(
     ] = False,
 ) -> RedirectResponse:
     entry_id = uuid4()
-    task = asyncio.create_task(_generate_canvas(), name=f"generate-canvas-{entry_id}")
+
+    task = asyncio.create_task(
+        _generate_canvas(state.configuration),
+        name=f"generate-canvas-{entry_id}",
+    )
+
     await state.set_response(entry_id, task)
 
     if wait:
@@ -84,7 +89,7 @@ async def canvas_prepare(
         filename=str(entry_id),
         url=AnyHttpUrl(
             os.path.join(
-                str(configuration.base_url),
+                str(state.configuration.base_url),
                 f"canvas/redirect-get/{entry_id}/",
             )
         ),
@@ -119,4 +124,4 @@ async def canvas_retreive(
 async def canvas_direct(
     state: DepState,
 ):
-    return await _generate_canvas()
+    return await _generate_canvas(state.configuration)

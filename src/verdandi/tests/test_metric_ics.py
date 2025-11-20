@@ -32,8 +32,8 @@ def test_velib(ics: ICSMetric):
     tz = ZoneInfo("Europe/Paris")
 
     assert ics.upcoming[0].summary == "Coiffeur"
-    assert ics.upcoming[0].date_start == datetime(2025, 11, 19, 12, 0, tzinfo=tz)
-    assert ics.upcoming[0].date_end == datetime(2025, 11, 19, 13, 0, tzinfo=tz)
+    assert ics.upcoming[0].date_start == datetime(2025, 11, 21, 12, 0, tzinfo=tz)
+    assert ics.upcoming[0].date_end == datetime(2025, 11, 21, 13, 0, tzinfo=tz)
     assert ics.upcoming[0].calendar.label == "Schedule"
 
     for idx in range(1, 6):

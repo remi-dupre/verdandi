@@ -8,6 +8,8 @@ from fastapi import Depends, Response
 from pydantic import BaseModel, Field
 
 
+from verdandi.configuration import ApiConfiguration
+
 MAX_REGISTRY_DURATION: timedelta = timedelta(hours=3)
 
 
@@ -26,6 +28,7 @@ class RegistryEntry(BaseModel, arbitrary_types_allowed=True):
 
 
 class AppState(BaseModel, arbitrary_types_allowed=True):
+    configuration: ApiConfiguration = Field(default_factory=ApiConfiguration.load)
     response_registry: dict[UUID, RegistryEntry] = Field(default_factory=dict)
     response_registry_lock: asyncio.Lock = Field(default_factory=asyncio.Lock)
 
