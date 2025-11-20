@@ -89,7 +89,6 @@ class ICSMetric(Metric):
 
 
 class ICSConfig(MetricConfig[ICSMetric], frozen=True):
-    name: str = "ics"
     timezone: str
     calendars: tuple[ICSCalendar, ...]
 

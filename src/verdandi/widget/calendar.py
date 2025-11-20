@@ -1,12 +1,13 @@
 from datetime import timedelta, date, datetime, time
 
+from pydantic import AnyHttpUrl
 from PIL import Image
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.widget.abs_widget import Widget
 from verdandi.util.draw import ShadeMatrix
 from verdandi.util.date import weekday_humanized, month_humanized
-from verdandi.metric.ics import ICSMetric, ICSConfig
+from verdandi.metric.ics import ICSMetric, ICSConfig, ICSCalendar
 from verdandi.component.text import Font, draw_text, TextArea, size_text
 from verdandi.component.icon import draw_icon
 from verdandi.util.text import keep_ascii, guess_icon
@@ -45,7 +46,16 @@ class Calendar3x4(Widget):
         return Calendar3x4(
             ics=ICSConfig(
                 timezone="Europe/Paris",
-                calendars=tuple(),
+                calendars=(
+                    ICSCalendar(
+                        label="Holidays",
+                        url=AnyHttpUrl("https://calendar-url/french-holidays.ics"),
+                    ),
+                    ICSCalendar(
+                        label="Schedule",
+                        url=AnyHttpUrl("https://calendar-url/schedule.ics"),
+                    ),
+                ),
             )
         )
 

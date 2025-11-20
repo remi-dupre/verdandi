@@ -1,41 +1,50 @@
 import asyncio
-import base64
+import json
+from pathlib import Path
+from io import TextIOWrapper
 
 import aiohttp
 import yaml
 
-from verdandi.util.image import image_to_bytes
 from verdandi.widget import ALL_WIDGETS
+from verdandi.tests.conftest import get_mocked_http
 
 
-async def docgen(http: aiohttp.ClientSession):
+DOCS_PATH = Path(__file__).parent.parent.parent / "doc"
+
+
+async def docgen(http: aiohttp.ClientSession, docs_file: TextIOWrapper):
+    print("Update widgets documentation in", DOCS_PATH)
+
+    def line(*args):
+        return print(*args, file=docs_file)
+
     for widget in ALL_WIDGETS:
         img = await widget.example().render(http)
-        img_data = image_to_bytes(img)
-        b64_data = base64.b64encode(img_data).decode("utf8")
+        img.save(DOCS_PATH / "images" / (widget.name + ".png"))
 
         example_config = [
             {
                 "name": widget.name,
-                "config": widget.example().dict(),
+                "config": json.loads(widget.example().model_dump_json()),
             }
         ]
 
-        print("##", widget.__name__)
-        print()
-        print(f"![{widget.name}](data:image/png;base64,{b64_data})")
-        print()
-        print("| | value |")
-        print("|---|---|")
-        print(f"| **name** | {widget.name} |")
-        print(f"| **width** | {widget.width()} |")
-        print(f"| **height** | {widget.height()} |")
-        print()
-        print("### Configuration Example")
-        print()
-        print("```yaml")
+        line("##", widget.__name__)
+        line()
+        line(f"![{widget.name}](./images/{widget.name}.png)")
+        line()
+        line("| | value |")
+        line("|---|---|")
+        line(f"| **name** | {widget.name} |")
+        line(f"| **width** | {widget.width()} |")
+        line(f"| **height** | {widget.height()} |")
+        line()
+        line("### Configuration Example")
+        line()
+        line("```yaml")
 
-        print(
+        line(
             yaml.dump(
                 example_config,
                 sort_keys=False,
@@ -43,14 +52,13 @@ async def docgen(http: aiohttp.ClientSession):
             )
         )
 
-        print("```")
+        line("```")
 
 
 async def main():
-    connector = aiohttp.TCPConnector(ssl=False)  # todo: is this a nixos issue?
-
-    async with aiohttp.ClientSession(connector=connector) as http:
-        await docgen(http)
+    with open(DOCS_PATH / "widgets.md", "wt") as f:
+        async with get_mocked_http() as http:
+            await docgen(http, f)
 
 
 def run():

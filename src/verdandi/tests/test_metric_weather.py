@@ -2,7 +2,6 @@ from datetime import datetime
 
 import aiohttp
 import pytest
-import time_machine
 from typing import AsyncGenerator
 
 from verdandi.metric.weather import WeatherConfig, WeatherMetric
@@ -10,9 +9,8 @@ from verdandi.metric.weather import WeatherConfig, WeatherMetric
 
 @pytest.fixture
 async def weather(http: aiohttp.ClientSession) -> AsyncGenerator[WeatherMetric]:
-    with time_machine.travel("2025-11-15 19:15"):
-        config = WeatherConfig(lat=48.86, lon=2.34, timezone="Europe/Paris")
-        yield await config.load(http)
+    config = WeatherConfig(lat=48.86, lon=2.34, timezone="Europe/Paris")
+    yield await config.load(http)
 
 
 def test_weather_parsing(weather: WeatherMetric):

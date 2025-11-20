@@ -35,7 +35,9 @@ widgets:
       ics:
         timezone: Europe/Paris
         calendars:
-          - label: Rémi
-            url: https://calendar.proton.me/api/calendar/v1/url/AEy2beiAQxrppWdl_C6eqpG84k4LW64DZJynQt24OvJ6GDYiOROpQSesG4VmV8On9yj8sMyU0II1rIDO1Aji6g==/calendar.ics?CacheKey=ljfPQBfeTxNGQ3kW801BXw%3D%3D&PassphraseKey=tJiojwsLhufNyn4ifZpxAn_isgPrSIx7wgSvzjFtm9M%3D
-          - label: Anaïs
-            url: https://calendar.google.com/calendar/ical/a.forget96%40gmail.com/private-0a88173dccf204c11cb8f71b093970ea/basic.ics
+          - label: Holidays
+            url: https://calendar-url/french-holidays.ics
+          # - label: Rémi
+          #   url: https://calendar.proton.me/api/calendar/v1/url/AEy2beiAQxrppWdl_C6eqpG84k4LW64DZJynQt24OvJ6GDYiOROpQSesG4VmV8On9yj8sMyU0II1rIDO1Aji6g==/calendar.ics?CacheKey=ljfPQBfeTxNGQ3kW801BXw%3D%3D&PassphraseKey=tJiojwsLhufNyn4ifZpxAn_isgPrSIx7wgSvzjFtm9M%3D
+          # - label: Anaïs
+          #   url: https://calendar.google.com/calendar/ical/a.forget96%40gmail.com/private-0a88173dccf204c11cb8f71b093970ea/basic.ics

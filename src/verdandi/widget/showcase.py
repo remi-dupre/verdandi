@@ -2,12 +2,13 @@ import logging
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
+from pydantic import AnyHttpUrl
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.component.icon import draw_icon
 from verdandi.component.progress import draw_progress
 from verdandi.component.text import Font, draw_text
-from verdandi.metric.ics import ICSConfig, ICSMetric
+from verdandi.metric.ics import ICSConfig, ICSMetric, ICSCalendar
 from verdandi.util.text import guess_icon, keep_ascii
 from verdandi.widget.abs_widget import Widget
 from verdandi.util.draw import ShadeMatrix
@@ -36,7 +37,16 @@ class Showcase2x1(Widget):
         return Showcase2x1(
             ics=ICSConfig(
                 timezone="Europe/Paris",
-                calendars=tuple(),
+                calendars=(
+                    ICSCalendar(
+                        label="Holidays",
+                        url=AnyHttpUrl("https://calendar-url/french-holidays.ics"),
+                    ),
+                    ICSCalendar(
+                        label="Schedule",
+                        url=AnyHttpUrl("https://calendar-url/schedule.ics"),
+                    ),
+                ),
             )
         )
 

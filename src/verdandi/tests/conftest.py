@@ -5,8 +5,10 @@ import json
 from typing import AsyncGenerator
 from unittest import mock
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 import aiohttp
+import time_machine
 from aioresponses import aioresponses
 from httpx import ASGITransport, AsyncClient
 
@@ -49,13 +51,51 @@ async def client(base_url: str, monkeypatch) -> AsyncGenerator[AsyncClient]:
             yield client
 
 
-@pytest.fixture
-async def http() -> AsyncGenerator[aiohttp.ClientSession]:
+@asynccontextmanager
+async def get_mocked_http() -> AsyncGenerator[aiohttp.ClientSession, None]:
     async with aiohttp.ClientSession() as http:
-        with aioresponses() as mock:
-            mock.get(
-                re.compile("^https://api.open-meteo.com/v1/forecast.*$"),
-                payload=json.load(open(FIXTURES_PATH / "open-meteo.json")),
-            )
+        with (
+            time_machine.travel("2025-11-15 19:15"),
+            aioresponses() as mock,
+        ):
+            with open(FIXTURES_PATH / "open-meteo.json") as f:
+                mock.get(
+                    re.compile("^https://api.open-meteo.com/v1/forecast.*$"),
+                    payload=json.load(f),
+                )
+
+            with open(FIXTURES_PATH / "velib" / "station_information.json") as f:
+                mock.get(
+                    re.compile(
+                        "^https://velib-metropole-opendata.smovengo.cloud/opendata/Velib_Metropole/station_information.json$"
+                    ),
+                    payload=json.load(f),
+                )
+
+            with open(FIXTURES_PATH / "velib" / "station_status.json") as f:
+                mock.get(
+                    re.compile(
+                        "^https://velib-metropole-opendata.smovengo.cloud/opendata/Velib_Metropole/station_status.json$"
+                    ),
+                    payload=json.load(f),
+                )
+
+            with open(FIXTURES_PATH / "ics" / "french-holidays.ics") as f:
+                mock.get(
+                    re.compile("^https://calendar-url/french-holidays.ics$"),
+                    body=f.read(),
+                )
+
+            with open(FIXTURES_PATH / "ics" / "schedule.ics") as f:
+                mock.get(
+                    re.compile("^https://calendar-url/schedule.ics$"),
+                    body=f.read(),
+                )
 
             yield http
+
+
+@pytest.fixture
+async def http() -> AsyncGenerator[aiohttp.ClientSession]:
+    async with get_mocked_http() as http:
+        yield http
