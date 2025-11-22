@@ -29,7 +29,7 @@ widgets:
       velib:
         station_id: 213686196
 
-  - name: calendar-3x4
+  - name: schedule-3x4
     position: [400, 0]
     config:
       ics:

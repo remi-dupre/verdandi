@@ -16,7 +16,7 @@ def keep_ascii(text: str) -> str:
 
 
 @lru_cache(maxsize=1024)
-def guess_icon(text: str) -> str | None:
+def summary_to_category(text: str) -> str | None:
     text = text.lower()
 
     for icon, mapping in ICON_MAPPING.items():

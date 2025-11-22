@@ -1,49 +1,28 @@
-from datetime import timedelta, date, datetime, time
+from datetime import date, timedelta
 
-from pydantic import AnyHttpUrl
-from PIL import Image
 from PIL.ImageDraw import ImageDraw
+from pydantic import AnyHttpUrl
 
+from verdandi.component.text import Font, draw_text
+from verdandi.metric.ics import ICSCalendar, ICSConfig, ICSMetric
+from verdandi.util.color import CB, CD, CL, CW
+from verdandi.util.text import summary_to_category
 from verdandi.widget.abs_widget import Widget
-from verdandi.util.draw import ShadeMatrix
-from verdandi.util.date import weekday_humanized, month_humanized
-from verdandi.metric.ics import ICSMetric, ICSConfig, ICSCalendar
-from verdandi.component.text import Font, draw_text, TextArea, size_text
-from verdandi.component.icon import draw_icon
-from verdandi.util.text import keep_ascii, guess_icon
-from verdandi.util.common import DIR_DATA
-from verdandi.util.color import CL, CW, CD
-from verdandi.util.draw import apply_mask_at
 
-MARGIN = 3
-MARGIN_LINES = 4
-MARGIN_DAY = 8
-
-DAY_SEPARATOR = Image.open(DIR_DATA / "ui" / "calendar-day-separator.png").convert(
-    mode="L"
-)
-
-MONTH_SEPARATOR_MASK = Image.open(
-    DIR_DATA / "ui" / "calendar-month-separator-mask.png"
-).convert(mode="L")
+MARGIN = 1
+CELL_SPACING = 2
+CELL_HEIGHT = 18
+CELL_WIDTH = 15
 
 
-SHADE_TIMELINE_BACKGROUND = ShadeMatrix(
-    [CL, CW],
-    [CW, CW],
-    [CW, CL],
-    [CW, CW],
-)
-
-
-class Calendar3x4(Widget):
-    name = "calendar-3x4"
-    size = (3, 4)
+class Calendar1x1(Widget):
+    name = "calendar-1x1"
+    size = (1, 1)
     ics: ICSConfig
 
     @classmethod
-    def example(cls) -> "Calendar3x4":
-        return Calendar3x4(
+    def example(cls) -> "Calendar1x1":
+        return Calendar1x1(
             ics=ICSConfig(
                 timezone="Europe/Paris",
                 calendars=(
@@ -60,143 +39,97 @@ class Calendar3x4(Widget):
         )
 
     def draw(self, draw: ImageDraw, ics: ICSMetric):
-        SHADE_TIMELINE_BACKGROUND.fill_rect(
-            draw,
-            (MARGIN, MARGIN, MARGIN + 17, self.height() - 2 * MARGIN),
-        )
-
         today = date.today()
-        events_per_day = {}
+        month_start = today.replace(day=1)
+        first_day = month_start - timedelta(days=month_start.weekday())
 
-        for event in ics.upcoming:
-            date_curr = event.date_start.date()
-
-            if event.date_start < event.date_end:
-                date_end = (event.date_end - timedelta(seconds=1)).date()
-            else:
-                date_end = date_curr
-
-            while date_curr <= date_end:
-                events_per_day.setdefault(date_curr, []).append(event)
-                date_curr += timedelta(days=1)
-
-        y_pos = MARGIN
-        prev_day = None
-
-        for day, events in iter(events_per_day.items()):
-            if y_pos > self.height() - (24 + MARGIN_DAY):
-                break
-
-            if day == today:
-                text = "AUJOURD'HUI"
-            elif day == today + timedelta(days=1):
-                text = "DEMAIN"
-            elif day - today < timedelta(days=7):
-                text = weekday_humanized(day).upper()
-            elif prev_day is None or day.month != prev_day.month:
-                text = month_humanized(day).upper()
-            else:
-                text = None
-
-            if text is not None:
-                draw_text(draw, (28, y_pos), Font.XMEDIUM_BOLD, text)
-                title_width = size_text(draw, Font.XMEDIUM_BOLD, text) + 10
-                y_pos += 12
-            else:
-                title_width = 0
-
-            # == Draw elipsis separators
-
-            if prev_day is not None:
-                if day.month != prev_day.month:
-                    apply_mask_at(
-                        draw,
-                        MONTH_SEPARATOR_MASK,
-                        (MARGIN, y_pos - MONTH_SEPARATOR_MASK.height - 4),
-                    )
-                elif day - prev_day > timedelta(days=1):
-                    draw._image.paste(
-                        DAY_SEPARATOR,
-                        (MARGIN, y_pos - DAY_SEPARATOR.height - 9),
-                    )
-
-            # == Draw day separator
-
-            draw.point(
-                [(x, y_pos) for x in range(28 + title_width, self.width() - MARGIN, 2)],
-                fill=CD,
-            )
-
-            # == Draw day number
+        for col, txt in enumerate("LMMJVSD"):
+            pos_x = MARGIN + col * (CELL_SPACING + CELL_WIDTH)
 
             draw_text(
                 draw,
-                (MARGIN + 9, y_pos),
-                Font.MEDIUM,
-                str(day.day),
-                anchor="mm",
+                (pos_x + (CELL_WIDTH + 1) // 2, 0),
+                Font.SMALL,
+                txt,
+                anchor="mt",
+                color=CD,
             )
 
-            y_pos += 12
+        for row in range(5):
+            for col in range(7):
+                day = first_day + timedelta(days=row * 7 + col)
+                events = ics.on_date(day)
+                cell_x = MARGIN + col * (CELL_SPACING + CELL_WIDTH)
+                cell_y = MARGIN + row * (CELL_SPACING + CELL_HEIGHT) + 8
 
-            for event in events:
-                if y_pos > self.height() - 24:
-                    break
+                primary_color = CB
+                background_color = CW
+                border_color = CB
 
-                time_start = max(
-                    event.date_start,
-                    datetime.combine(
-                        day,
-                        time(0, 0),
-                        tzinfo=event.date_start.tzinfo,
-                    ),
-                )
+                if day == today:
+                    primary_color = CW
+                    background_color = CB
+                    border_color = CB
+                elif day.month != today.month:
+                    primary_color = CL
+                    border_color = None
+                elif day < today:
+                    primary_color = CL
+                    border_color = CL
 
-                time_end = min(
-                    event.date_end,
-                    datetime.combine(
-                        day + timedelta(days=1),
-                        time(0, 0),
-                        tzinfo=event.date_end.tzinfo,
-                    ),
-                )
-
-                time_str = (
-                    time_start.strftime("%Hh%M") + "-" + time_end.strftime("%Hh%M")
-                ).replace("h00", "h")
-
-                # Initial position for the text area
-                initial_cursor_x = 0
-
-                if time_str != "00h-00h":
-                    initial_cursor_x += 94
-                    draw_text(draw, (73, y_pos + 7), Font.MEDIUM, time_str, anchor="mt")
-
+                if border_color is not None:
                     draw.rounded_rectangle(
-                        (28, y_pos + 3, 28 + 89, y_pos + 19), radius=3
+                        xy=(
+                            cell_x,
+                            cell_y,
+                            cell_x + CELL_WIDTH - 1,
+                            cell_y + CELL_HEIGHT - 1,
+                        ),
+                        radius=2,
+                        outline=border_color,
+                        fill=background_color,
                     )
 
-                if icon := guess_icon(event.summary):
-                    draw_icon(draw, (28 + initial_cursor_x, y_pos + 3), "small-" + icon)
-                    initial_cursor_x += 18
-
-                text_area = TextArea(
-                    draw=draw,
-                    bounds=(28, y_pos, self.width() - MARGIN, None),
-                    line_height=22,
-                    cursor=(initial_cursor_x, 0),
+                draw_text(
+                    draw,
+                    (cell_x + (CELL_WIDTH + 1) // 2, cell_y + 5),
+                    Font.SMALL,
+                    str(day.day),
+                    anchor="mt",
+                    color=primary_color,
                 )
 
-                text_area.draw_text(Font.XMEDIUM, keep_ascii(event.summary))
+                if any(event.is_full_day(day) for event in events):
+                    line_pos_y = cell_y + 2
 
-                text_area.draw_text(
-                    Font.MEDIUM,
-                    f"- {event.calendar.label}",
-                    breakable=False,
-                    color=CD,
-                )
+                    # If the only full day events are birthdays, draw a dashed line
+                    only_birthday = not any(
+                        event.is_full_day(day)
+                        and summary_to_category(event.summary) != "present"
+                        for event in events
+                    )
 
-                y_pos += text_area.height + MARGIN_LINES
+                    draw.point(
+                        [
+                            (x, line_pos_y)
+                            for x in range(
+                                cell_x + 2,
+                                cell_x + CELL_WIDTH - 2,
+                                2 if only_birthday else 1,
+                            )
+                        ],
+                        fill=primary_color,
+                    )
 
-            y_pos += MARGIN_DAY
-            prev_day = day
+                for event in events:
+                    if event.is_full_day(day):
+                        continue
+
+                    period = event.day_period(day)
+                    rect_x = cell_x + 2 + 3 * period.value
+                    rect_y = cell_y + 14
+
+                    draw.rectangle(
+                        (rect_x, rect_y, rect_x + 1, rect_y + 1),
+                        fill=primary_color,
+                    )

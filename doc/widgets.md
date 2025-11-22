@@ -1,17 +1,17 @@
-## Calendar3x4
+## Calendar1x1
 
-![calendar-3x4](./images/calendar-3x4.png)
+![calendar-1x1](./images/calendar-1x1.png)
 
 | | value |
 |---|---|
-| **name** | calendar-3x4 |
-| **width** | 399 |
-| **height** | 480 |
+| **name** | calendar-1x1 |
+| **width** | 133 |
+| **height** | 120 |
 
 ### Configuration Example
 
 ```yaml
-- name: calendar-3x4
+- name: calendar-1x1
   config:
     ics:
       timezone: Europe/Paris
@@ -40,6 +40,54 @@
     title: New decade
     date_start: '2020-01-01'
     date_end: '2030-01-01'
+
+```
+## Schedule3x4
+
+![schedule-3x4](./images/schedule-3x4.png)
+
+| | value |
+|---|---|
+| **name** | schedule-3x4 |
+| **width** | 399 |
+| **height** | 480 |
+
+### Configuration Example
+
+```yaml
+- name: schedule-3x4
+  config:
+    ics:
+      timezone: Europe/Paris
+      calendars:
+      - url: https://calendar-url/french-holidays.ics
+        label: Holidays
+      - url: https://calendar-url/schedule.ics
+        label: Schedule
+
+```
+## Showcase2x1
+
+![showcase-2x1](./images/showcase-2x1.png)
+
+| | value |
+|---|---|
+| **name** | showcase-2x1 |
+| **width** | 266 |
+| **height** | 120 |
+
+### Configuration Example
+
+```yaml
+- name: showcase-2x1
+  config:
+    ics:
+      timezone: Europe/Paris
+      calendars:
+      - url: https://calendar-url/french-holidays.ics
+        label: Holidays
+      - url: https://calendar-url/schedule.ics
+        label: Schedule
 
 ```
 ## Velib1x1
@@ -101,29 +149,5 @@
       lat: 48.871
       lon: 2.292
       timezone: Europe/Paris
-
-```
-## Showcase2x1
-
-![showcase-2x1](./images/showcase-2x1.png)
-
-| | value |
-|---|---|
-| **name** | showcase-2x1 |
-| **width** | 266 |
-| **height** | 120 |
-
-### Configuration Example
-
-```yaml
-- name: showcase-2x1
-  config:
-    ics:
-      timezone: Europe/Paris
-      calendars:
-      - url: https://calendar-url/french-holidays.ics
-        label: Holidays
-      - url: https://calendar-url/schedule.ics
-        label: Schedule
 
 ```

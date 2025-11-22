@@ -1,7 +1,7 @@
 import asyncio
 import enum
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from typing import ClassVar
 from zoneinfo import ZoneInfo
 
@@ -26,6 +26,27 @@ class Label(enum.Enum):
 class ICSCalendar(BaseModel, frozen=True):
     url: AnyHttpUrl
     label: str
+
+
+@enum.unique
+class DayPeriod(enum.Enum):
+    MORNING = 0
+    NOON = 1
+    AFTERNOON = 2
+    EVENING = 3
+
+    def time_span(self) -> tuple[time, time]:
+        match self:
+            case self.MORNING:
+                return (time(0), time(11))
+            case self.NOON:
+                return (time(11), time(14))
+            case self.AFTERNOON:
+                return (time(14), time(18))
+            case self.EVENING:
+                return (time(18), time(23, 59))
+            case _:
+                raise NotImplementedError()
 
 
 class ICSEvent(BaseModel):
@@ -75,9 +96,56 @@ class ICSEvent(BaseModel):
             labels=labels,
         )
 
+    def is_full_day(self, day: date) -> bool:
+        """
+        Check if the event covers the whole given date.
+        """
+        return (
+            self.date_start.date() <= day <= self.date_end.date()
+            and self.date_start == self.date_end
+        ) or (
+            self.date_start
+            <= datetime.combine(day, time(0, 0), tzinfo=self.date_start.tzinfo)
+            and self.date_end
+            >= datetime.combine(day, time(23, 59), tzinfo=self.date_end.tzinfo)
+        )
+
+    def day_period(self, day: date) -> DayPeriod:
+        """
+        Return the day period that best describes the event. If the event
+        fully spans multiple periods, the earliest one is returned.
+        """
+
+        def period_ratio(period: DayPeriod) -> float:
+            # Period bounds on day
+            p_start = datetime.combine(
+                day,
+                period.time_span()[0],
+                tzinfo=self.date_start.tzinfo,
+            )
+
+            p_end = datetime.combine(
+                day,
+                period.time_span()[1],
+                tzinfo=self.date_end.tzinfo,
+            )
+
+            # Event bounds
+            e_start = max(p_start, self.date_start)
+            e_end = min(p_end, self.date_end)
+
+            return (
+                -(e_end - e_start).total_seconds() / (p_end - p_start).total_seconds()
+            )
+
+        period_ratios = [(period_ratio(period), period) for period in list(DayPeriod)]
+        period_ratios.sort()
+        return period_ratios[0][1]
+
 
 class ICSMetric(Metric):
     name: ClassVar[str] = "ics"
+    all_events: list[ICSEvent]
     upcoming: list[ICSEvent]
     showcase: list[ICSEvent]
 
@@ -86,6 +154,19 @@ class ICSMetric(Metric):
             (event for event in self.showcase if event.date_end > now),
             None,
         )
+
+    def on_date(self, day: date) -> list[ICSEvent]:
+        return [
+            event
+            for event in self.all_events
+            if (
+                event.date_start.date() <= day
+                and (
+                    event.date_end
+                    > datetime.combine(day, time(0, 0), tzinfo=event.date_end.tzinfo)
+                )
+            )
+        ]
 
 
 class ICSConfig(MetricConfig[ICSMetric], frozen=True):
@@ -135,6 +216,7 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
         all_events.sort(key=lambda e: e.date_start)
 
         return ICSMetric(
+            all_events=all_events,
             upcoming=[event for event in all_events if now <= event.date_end],
             showcase=[event for event in all_events if Label.SHOWCASE in event.labels],
         )

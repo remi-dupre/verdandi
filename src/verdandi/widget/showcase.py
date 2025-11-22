@@ -9,7 +9,7 @@ from verdandi.component.icon import draw_icon
 from verdandi.component.progress import draw_progress
 from verdandi.component.text import Font, draw_text
 from verdandi.metric.ics import ICSConfig, ICSMetric, ICSCalendar
-from verdandi.util.text import guess_icon, keep_ascii
+from verdandi.util.text import summary_to_category, keep_ascii
 from verdandi.widget.abs_widget import Widget
 from verdandi.util.draw import ShadeMatrix
 from verdandi.util.color import CW, CL
@@ -85,7 +85,7 @@ class Showcase2x1(Widget):
                 year_end - year_start
             )
 
-            icon = guess_icon(event.summary) or "unknown"
+            icon = summary_to_category(event.summary) or "unknown"
             icon_x = bar_x_start + int(year_progress * (bar_x_end - bar_x_start))
             draw_icon(draw, (icon_x - 8, 60), "small-" + icon)
 
@@ -100,7 +100,7 @@ class Showcase2x1(Widget):
         text = f"Dans {remaining} jours"
         title_x = MARGIN
 
-        if icon := guess_icon(event.summary):
+        if icon := summary_to_category(event.summary):
             draw_icon(draw, (title_x, 9), "small-" + icon)
             title_x += 18
 
