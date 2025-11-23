@@ -43,7 +43,7 @@ def next_time_cadenced(now: datetime, interval: timedelta) -> datetime:
     curr = date_start
     assert interval.total_seconds() > 0.0
 
-    while curr <= now:
+    while curr < now + timedelta(minutes=1):
         curr += interval
 
     if curr.date() > now.date():
