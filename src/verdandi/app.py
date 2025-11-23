@@ -9,7 +9,6 @@ import aiohttp
 from PIL import Image
 from fastapi import FastAPI, Response, Path, Query
 from pydantic import BaseModel, AnyHttpUrl
-from simpleeval import simple_eval
 
 from verdandi.util.color import CW
 from verdandi.state import DepState
@@ -30,39 +29,24 @@ app = FastAPI(
 
 
 @async_log_duration(logger, "Canvas generation")
-async def _generate_canvas(configuration: ApiConfiguration):
-    now = datetime.now()
-
+async def _generate_canvas(configuration: ApiConfiguration, now: datetime):
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
+    displayed_widgets = [
+        widget for widget in configuration.widgets if widget.is_displayed_at(now)
+    ]
+
     async with aiohttp.ClientSession(connector=connector) as http:
         widget_imgs = await asyncio.gather(
-            *(widget.config.render(http) for widget in configuration.widgets)
+            *(widget.config.render(http) for widget in displayed_widgets)
         )
 
     # Paste rendered widgets to appropriate locations in a canvas
     img = Image.new(mode="L", size=configuration.size, color=CW)
 
-    for widget, widget_img in zip(configuration.widgets, widget_imgs):
-        is_displayed = simple_eval(
-            widget.when,
-            names={
-                "now": {
-                    "hour": now.hour,
-                    "minute": now.minute,
-                    "weekday": now.weekday(),
-                    "month": now.month,
-                    "day": now.day,
-                }
-            },
-        )
-
-        if not isinstance(is_displayed, bool):
-            logger.warning("`when` does not evaluate to bool for %s", widget.name)
-
-        if is_displayed:
-            img.paste(widget_img, widget.position)
+    for widget, widget_img in zip(displayed_widgets, widget_imgs):
+        img.paste(widget_img, widget.position)
 
     # Encode image to a buffer and respond
     return Response(
@@ -95,9 +79,10 @@ async def canvas_prepare(
     ] = False,
 ) -> RedirectResponse:
     entry_id = uuid4()
+    now = datetime.now()
 
     task = asyncio.create_task(
-        _generate_canvas(state.configuration),
+        _generate_canvas(state.configuration, now),
         name=f"generate-canvas-{entry_id}",
     )
 
@@ -106,8 +91,23 @@ async def canvas_prepare(
     if wait:
         await task
 
+    # Check next update time
+    next_update = min(
+        widget.config.next_update(now)
+        for widget in state.configuration.widgets
+        if widget.is_displayed_at(widget.config.next_update(now))
+    )
+
+    refresh_rate = max(
+        60.0,
+        (next_update - now).total_seconds(),
+    )
+
+    logger.info("Next update at %s", next_update.isoformat())
+
     return RedirectResponse(
         filename=str(entry_id),
+        refresh_rate=int(refresh_rate),
         url=AnyHttpUrl(
             os.path.join(
                 str(state.configuration.base_url),
@@ -145,4 +145,5 @@ async def canvas_retreive(
 async def canvas_direct(
     state: DepState,
 ):
-    return await _generate_canvas(state.configuration)
+    now = datetime.now()
+    return await _generate_canvas(state.configuration, now)

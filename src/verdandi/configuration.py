@@ -1,11 +1,17 @@
+import logging
 import os
+from datetime import datetime
 from typing import Annotated, Union, Literal
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field, AnyHttpUrl
+from simpleeval import simple_eval
 
 from verdandi.widget import ALL_WIDGETS
+
+
+logger = logging.getLogger(__name__)
 
 
 def widget_config_for(widget_type):
@@ -14,6 +20,25 @@ def widget_config_for(widget_type):
         position: tuple[int, int]
         when: str = "True"
         config: widget_type
+
+        def is_displayed_at(self, now: datetime) -> bool:
+            res = simple_eval(
+                self.when,
+                names={
+                    "now": {
+                        "hour": now.hour,
+                        "minute": now.minute,
+                        "weekday": now.weekday(),
+                        "month": now.month,
+                        "day": now.day,
+                    }
+                },
+            )
+
+            if not isinstance(res, bool):
+                logger.warning("`when` does not evaluate to bool for %s", self.name)
+
+            return bool(res)
 
     return WidgetConfiguration
 

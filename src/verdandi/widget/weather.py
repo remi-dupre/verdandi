@@ -11,6 +11,7 @@ from verdandi.metric.weather import WeatherMetric, WeatherConfig
 from verdandi.util.date import weekday_humanized
 from verdandi.util.draw import ShadeMatrix
 from verdandi.util.color import CL, CW, CD
+from verdandi.util.date import next_time_cadenced
 
 
 MARGIN = 6
@@ -35,6 +36,9 @@ class WeatherRecap3x2(Widget):
     name = "weather-recap-3x2"
     size = (3, 2)
     weather: WeatherConfig
+
+    def next_update(self, now: datetime) -> datetime:
+        return next_time_cadenced(now, timedelta(hours=1))
 
     @classmethod
     def example(cls) -> "WeatherRecap3x2":

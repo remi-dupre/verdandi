@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.widget.abs_widget import Widget
@@ -7,6 +9,7 @@ from verdandi.component.icon import draw_icon
 from verdandi.metric.velib import VelibMetric, VelibConfig
 from verdandi.util.draw import ShadeMatrix, ShadeUniform
 from verdandi.util.color import CW, CL, CD
+from verdandi.util.date import next_time_cadenced
 
 FILL_MECHANICAL = ShadeMatrix([CD, CL], [CL, CD])
 FILL_ELECTRIC = ShadeMatrix([CW, CL], [CL, CW])
@@ -16,6 +19,9 @@ class Velib1x1(Widget):
     name = "velib-1x1"
     size = (1, 1)
     velib: VelibConfig
+
+    def next_update(self, now: datetime) -> datetime:
+        return next_time_cadenced(now, timedelta(hours=3))
 
     @classmethod
     def example(cls) -> "Velib1x1":

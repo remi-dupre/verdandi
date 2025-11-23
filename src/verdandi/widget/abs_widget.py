@@ -1,5 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 from typing import ClassVar, Self
 
 import aiohttp
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 from verdandi.metric.abs_metric import MetricConfig
 from verdandi.util.common import executor
 from verdandi.util.color import CW
+from verdandi.util.date import next_time_cadenced
 
 
 class Widget(ABC, BaseModel):
@@ -23,6 +25,12 @@ class Widget(ABC, BaseModel):
     @classmethod
     def height(cls) -> int:
         return 120 * cls.size[1]
+
+    def next_update(self, now: datetime) -> datetime:
+        """
+        Return the next time this widget wishes to be updated at.
+        """
+        return next_time_cadenced(now, timedelta(hours=6))
 
     @classmethod
     @abstractmethod

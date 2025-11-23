@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 _DOW_STR = {
     0: "lundi",
@@ -32,3 +32,21 @@ def weekday_humanized(date: date) -> str:
 
 def month_humanized(date: date) -> str:
     return _MONTH_STR[date.month]
+
+
+def next_time_cadenced(now: datetime, interval: timedelta) -> datetime:
+    """
+    Split the days into intervals of fixed time and return the next recurring
+    interval.
+    """
+    date_start = now.replace(hour=0, minute=0, second=0)
+    curr = date_start
+    assert interval.total_seconds() > 0.0
+
+    while curr <= now:
+        curr += interval
+
+    if curr.date() > now.date():
+        return date_start + timedelta(days=1)
+
+    return curr
