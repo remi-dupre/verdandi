@@ -12,6 +12,7 @@ def widget_config_for(widget_type):
     class WidgetConfiguration(BaseModel):
         name: Literal[widget_type.name]  # ty: ignore[invalid-type-form]
         position: tuple[int, int]
+        when: str = "True"
         config: widget_type
 
     return WidgetConfiguration

@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import os
+from datetime import datetime
 from uuid import UUID, uuid4
 from typing import Annotated
 
@@ -8,6 +9,7 @@ import aiohttp
 from PIL import Image
 from fastapi import FastAPI, Response, Path, Query
 from pydantic import BaseModel, AnyHttpUrl
+from simpleeval import simple_eval
 
 from verdandi.util.color import CW
 from verdandi.state import DepState
@@ -29,6 +31,8 @@ app = FastAPI(
 
 @async_log_duration(logger, "Canvas generation")
 async def _generate_canvas(configuration: ApiConfiguration):
+    now = datetime.now()
+
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
@@ -41,7 +45,24 @@ async def _generate_canvas(configuration: ApiConfiguration):
     img = Image.new(mode="L", size=configuration.size, color=CW)
 
     for widget, widget_img in zip(configuration.widgets, widget_imgs):
-        img.paste(widget_img, widget.position)
+        is_displayed = simple_eval(
+            widget.when,
+            names={
+                "now": {
+                    "hour": now.hour,
+                    "minute": now.minute,
+                    "weekday": now.weekday(),
+                    "month": now.month,
+                    "day": now.day,
+                }
+            },
+        )
+
+        if not isinstance(is_displayed, bool):
+            logger.warning("`when` does not evaluate to bool for %s", widget.name)
+
+        if is_displayed:
+            img.paste(widget_img, widget.position)
 
     # Encode image to a buffer and respond
     return Response(
