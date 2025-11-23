@@ -39,7 +39,7 @@ def next_time_cadenced(now: datetime, interval: timedelta) -> datetime:
     Split the days into intervals of fixed time and return the next recurring
     interval.
     """
-    date_start = now.replace(hour=0, minute=0, second=0)
+    date_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     curr = date_start
     assert interval.total_seconds() > 0.0
 

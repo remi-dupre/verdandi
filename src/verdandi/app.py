@@ -79,7 +79,7 @@ async def canvas_prepare(
     ] = False,
 ) -> RedirectResponse:
     entry_id = uuid4()
-    now = datetime.now()
+    now = datetime.now().astimezone()
 
     task = asyncio.create_task(
         _generate_canvas(state.configuration, now),
@@ -145,5 +145,5 @@ async def canvas_retreive(
 async def canvas_direct(
     state: DepState,
 ):
-    now = datetime.now()
+    now = datetime.now().astimezone()
     return await _generate_canvas(state.configuration, now)
