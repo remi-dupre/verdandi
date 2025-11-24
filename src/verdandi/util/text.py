@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-ICON_MAPPING = {
+CATEGORY_MAPPING = {
     "christmas-tree": ["🎄"],
     "heart": ["❤️", "💍", "couple"],
     "present": ["🎂", "anniversaire"],
@@ -8,6 +8,7 @@ ICON_MAPPING = {
     "coffee": ["☕", "café", "brunch", "goûter"],
     "tablewear": ["🍽️", "dîner", "déjeuner", "repas"],
     "medical": ["🩸", "💉", "🩺", "🧑🏽‍⚕"],
+    "music": ["concert"],
 }
 
 
@@ -19,7 +20,7 @@ def keep_ascii(text: str) -> str:
 def summary_to_category(text: str) -> str | None:
     text = text.lower()
 
-    for icon, mapping in ICON_MAPPING.items():
+    for icon, mapping in CATEGORY_MAPPING.items():
         for x in mapping:
             if x in text:
                 return icon
