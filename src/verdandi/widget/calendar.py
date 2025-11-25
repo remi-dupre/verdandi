@@ -9,7 +9,7 @@ from verdandi.util.color import CB, CD, CL, CW
 from verdandi.util.text import summary_to_category
 from verdandi.widget.abs_widget import Widget
 
-MARGIN = 1
+MARGIN = 7
 CELL_SPACING = 2
 CELL_HEIGHT = 18
 CELL_WIDTH = 15
@@ -48,7 +48,7 @@ class Calendar1x1(Widget):
 
             draw_text(
                 draw,
-                (pos_x + (CELL_WIDTH + 1) // 2, 0),
+                (pos_x + (CELL_WIDTH + 1) // 2, MARGIN - 2),
                 Font.SMALL,
                 txt,
                 anchor="mt",

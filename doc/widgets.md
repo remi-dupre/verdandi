@@ -1,12 +1,20 @@
 ## Calendar1x1
 
-![calendar-1x1](./images/calendar-1x1.png)
+![calendar-1x1](./images/widgets/calendar-1x1.png)
 
 | | value |
 |---|---|
 | **name** | calendar-1x1 |
 | **width** | 133 |
 | **height** | 120 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **ics.timezone** | str | your local timezone |
+| **ics.calendars[].url** | AnyHttpUrl | public URL of the ICS calendar |
+| **ics.calendars[].label** | str | calendar name to display next to the events |
 
 ### Configuration Example
 
@@ -24,13 +32,21 @@
 ```
 ## Countdown2x1
 
-![countdown-2x1](./images/countdown-2x1.png)
+![countdown-2x1](./images/widgets/countdown-2x1.png)
 
 | | value |
 |---|---|
 | **name** | countdown-2x1 |
 | **width** | 266 |
 | **height** | 120 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **title** | str | title displayed on top of the widget |
+| **date_start** | date | countdown start |
+| **date_end** | date | countdown end |
 
 ### Configuration Example
 
@@ -44,13 +60,21 @@
 ```
 ## Schedule3x4
 
-![schedule-3x4](./images/schedule-3x4.png)
+![schedule-3x4](./images/widgets/schedule-3x4.png)
 
 | | value |
 |---|---|
 | **name** | schedule-3x4 |
 | **width** | 399 |
 | **height** | 480 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **ics.timezone** | str | your local timezone |
+| **ics.calendars[].url** | AnyHttpUrl | public URL of the ICS calendar |
+| **ics.calendars[].label** | str | calendar name to display next to the events |
 
 ### Configuration Example
 
@@ -68,13 +92,21 @@
 ```
 ## Showcase2x1
 
-![showcase-2x1](./images/showcase-2x1.png)
+![showcase-2x1](./images/widgets/showcase-2x1.png)
 
 | | value |
 |---|---|
 | **name** | showcase-2x1 |
 | **width** | 266 |
 | **height** | 120 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **ics.timezone** | str | your local timezone |
+| **ics.calendars[].url** | AnyHttpUrl | public URL of the ICS calendar |
+| **ics.calendars[].label** | str | calendar name to display next to the events |
 
 ### Configuration Example
 
@@ -92,13 +124,19 @@
 ```
 ## Velib1x1
 
-![velib-1x1](./images/velib-1x1.png)
+![velib-1x1](./images/widgets/velib-1x1.png)
 
 | | value |
 |---|---|
 | **name** | velib-1x1 |
 | **width** | 133 |
 | **height** | 120 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **velib.station_id** | int |  |
 
 ### Configuration Example
 
@@ -111,7 +149,7 @@
 ```
 ## WeatherRecap3x2
 
-![weather-recap-3x2](./images/weather-recap-3x2.png)
+![weather-recap-3x2](./images/widgets/weather-recap-3x2.png)
 
 | | value |
 |---|---|
@@ -119,20 +157,28 @@
 | **width** | 399 |
 | **height** | 240 |
 
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **weather.timezone** | str | your local timezone |
+| **weather.lat** | float | your latitude |
+| **weather.lon** | float | your longitude |
+
 ### Configuration Example
 
 ```yaml
 - name: weather-recap-3x2
   config:
     weather:
+      timezone: Europe/Paris
       lat: 48.871
       lon: 2.292
-      timezone: Europe/Paris
 
 ```
 ## WeatherWeek3x1
 
-![weather-week-3x1](./images/weather-week-3x1.png)
+![weather-week-3x1](./images/widgets/weather-week-3x1.png)
 
 | | value |
 |---|---|
@@ -140,14 +186,22 @@
 | **width** | 399 |
 | **height** | 120 |
 
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+| **weather.timezone** | str | your local timezone |
+| **weather.lat** | float | your latitude |
+| **weather.lon** | float | your longitude |
+
 ### Configuration Example
 
 ```yaml
 - name: weather-week-3x1
   config:
     weather:
+      timezone: Europe/Paris
       lat: 48.871
       lon: 2.292
-      timezone: Europe/Paris
 
 ```

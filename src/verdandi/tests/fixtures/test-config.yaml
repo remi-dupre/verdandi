@@ -16,28 +16,23 @@ widgets:
     config:
       weather: *weather-config
 
-  - name: countdown-2x1
-    position: [1, 360]
-    config:
-      title: Japon !!! \o/
-      date_start: 2024-08-10
-      date_end: 2025-09-23
-
-  - name: velib-1x1
-    position: [267, 360]
-    config:
-      velib:
-        station_id: 213686196
-
   - name: schedule-3x4
     position: [400, 0]
     config:
-      ics:
+      ics: &config-ics
         timezone: Europe/Paris
         calendars:
           - label: Holidays
             url: https://calendar-url/french-holidays.ics
-          # - label: Rémi
-          #   url: https://calendar.proton.me/api/calendar/v1/url/AEy2beiAQxrppWdl_C6eqpG84k4LW64DZJynQt24OvJ6GDYiOROpQSesG4VmV8On9yj8sMyU0II1rIDO1Aji6g==/calendar.ics?CacheKey=ljfPQBfeTxNGQ3kW801BXw%3D%3D&PassphraseKey=tJiojwsLhufNyn4ifZpxAn_isgPrSIx7wgSvzjFtm9M%3D
-          # - label: Anaïs
-          #   url: https://calendar.google.com/calendar/ical/a.forget96%40gmail.com/private-0a88173dccf204c11cb8f71b093970ea/basic.ics
+          - label: Perso
+            url: https://calendar-url/schedule.ics
+
+  - name: showcase-2x1
+    position: [1, 360]
+    config:
+      ics: *config-ics
+
+  - name: calendar-1x1
+    position: [267, 360]
+    config:
+      ics: *config-ics

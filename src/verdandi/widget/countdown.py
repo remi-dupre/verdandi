@@ -1,5 +1,6 @@
 from datetime import date
 
+from pydantic import Field
 from PIL.ImageDraw import ImageDraw
 
 from verdandi.widget.abs_widget import Widget
@@ -13,10 +14,9 @@ MARGIN = 6
 class Countdown2x1(Widget):
     name = "countdown-2x1"
     size = (2, 1)
-
-    title: str
-    date_start: date
-    date_end: date
+    title: str = Field(description="title displayed on top of the widget")
+    date_start: date = Field(description="countdown start")
+    date_end: date = Field(description="countdown end")
 
     @classmethod
     def example(cls) -> "Countdown2x1":

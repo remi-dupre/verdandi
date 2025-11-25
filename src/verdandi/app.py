@@ -29,7 +29,7 @@ app = FastAPI(
 
 
 @async_log_duration(logger, "Canvas generation")
-async def _generate_canvas(configuration: ApiConfiguration, now: datetime):
+async def generate_canvas(configuration: ApiConfiguration, now: datetime):
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
@@ -82,7 +82,7 @@ async def canvas_prepare(
     now = datetime.now().astimezone()
 
     task = asyncio.create_task(
-        _generate_canvas(state.configuration, now),
+        generate_canvas(state.configuration, now),
         name=f"generate-canvas-{entry_id}",
     )
 
@@ -146,4 +146,4 @@ async def canvas_direct(
     state: DepState,
 ):
     now = datetime.now().astimezone()
-    return await _generate_canvas(state.configuration, now)
+    return await generate_canvas(state.configuration, now)

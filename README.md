@@ -2,6 +2,10 @@
 
 Drawing beautiful configurable dashboard screens for trmnl.
 
+![example display](./doc/images/example.png)
+
+A list of all available widgets is available [here](./doc/widgets.md).
+
 ## Developpement
 
 Install pre-commit hook and dependancies :

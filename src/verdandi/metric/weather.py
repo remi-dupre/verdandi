@@ -5,7 +5,7 @@ from functools import cache
 from typing import ClassVar
 
 import aiohttp
-from pydantic import BaseModel, conlist
+from pydantic import BaseModel, conlist, Field
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
 from verdandi.util.logging import async_log_duration
@@ -108,9 +108,9 @@ class WeatherMetric(Metric):
 
 
 class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
-    lat: float
-    lon: float
-    timezone: str
+    timezone: str = Field(description="your local timezone")
+    lat: float = Field(description="your latitude")
+    lon: float = Field(description="your longitude")
 
     API_URL: ClassVar[str] = "https://api.open-meteo.com/v1/forecast"
 

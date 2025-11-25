@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import aiohttp
 from icalevents.icalevents import events, Event
-from pydantic import AnyHttpUrl, BaseModel, AwareDatetime
+from pydantic import AnyHttpUrl, BaseModel, AwareDatetime, Field
 
 from verdandi.metric.abs_metric import Metric, MetricConfig
 from verdandi.util.cache import async_time_cache
@@ -24,8 +24,8 @@ class Label(enum.Enum):
 
 
 class ICSCalendar(BaseModel, frozen=True):
-    url: AnyHttpUrl
-    label: str
+    url: AnyHttpUrl = Field(description="public URL of the ICS calendar")
+    label: str = Field(description="calendar name to display next to the events")
 
 
 @enum.unique
@@ -170,7 +170,7 @@ class ICSMetric(Metric):
 
 
 class ICSConfig(MetricConfig[ICSMetric], frozen=True):
-    timezone: str
+    timezone: str = Field(description="your local timezone")
     calendars: tuple[ICSCalendar, ...]
 
     @staticmethod
