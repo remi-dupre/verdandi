@@ -4,7 +4,7 @@ CATEGORY_MAPPING = {
     "christmas-tree": ["🎄", "noël"],
     "heart": [*"❤️💍", "couple"],
     "present": ["🎂", "anniversaire"],
-    "beer": [*"🍺🍻🍸", "cocktail", "bière"],
+    "beer": [*"🍺🍻🍸", "cocktail", "bière", "verre"],
     "coffee": ["☕", "café", "brunch", "goûter"],
     "tablewear": ["🍽️", "dîner", "déjeuner", "repas"],
     "medical": ["🩸", "💉", "🩺", "🧑🏽‍⚕"],
