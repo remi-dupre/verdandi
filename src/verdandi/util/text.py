@@ -12,6 +12,7 @@ CATEGORY_MAPPING = {
     "scissors": ["✂", "coiffeur"],
     "shopping": [*"🛍🛒", "courses"],
     "work": ["séminaire", "travail", "entretiens"],
+    "train": [*"🚂🚆🚉🚄🛤🚅🚃", "train"],
 }
 
 
