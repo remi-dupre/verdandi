@@ -48,6 +48,9 @@ class DayPeriod(enum.Enum):
             case _:
                 raise NotImplementedError()
 
+    def __lt__(self, other: "DayPeriod") -> bool:
+        return self.value < other.value
+
 
 class ICSEvent(BaseModel):
     summary: str
@@ -139,7 +142,7 @@ class ICSEvent(BaseModel):
             )
 
         period_ratios = [(period_ratio(period), period) for period in list(DayPeriod)]
-        period_ratios.sort()
+        period_ratios.sort(key=lambda x: x[0])
         return period_ratios[0][1]
 
 
