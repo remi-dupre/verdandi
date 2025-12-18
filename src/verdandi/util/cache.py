@@ -4,6 +4,7 @@ from asyncio import Event
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable
 
+import aiohttp
 from pydantic import BaseModel
 
 logger = logging.getLogger("uvicorn.error")
@@ -11,6 +12,10 @@ logger = logging.getLogger("uvicorn.error")
 
 # Unique object that can serve as separator in cache keys
 KWD_MARK = object()
+
+
+# Types that are ignored by cache
+IGNORED_TYPES = [aiohttp.ClientSession]
 
 
 class CacheSlot[T](BaseModel):
@@ -30,12 +35,20 @@ def async_time_cache[**P, R](
     ) -> Callable[..., Awaitable[R]]:
         @functools.wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            cache_key = (*args, KWD_MARK, *sorted(kwargs.items()))
+            cache_params = (*args, KWD_MARK, *sorted(kwargs.items()))
+
+            cache_key = tuple(
+                param
+                for param in cache_params
+                if not any(
+                    isinstance(param, ignored_type) for ignored_type in IGNORED_TYPES
+                )
+            )
+
             now = datetime.now()
 
             # Extract stores from wrapped object
             cache_store: dict[Any, CacheSlot] = wrapper.cache_store  # ty: ignore[unresolved-attribute]
-
             cache_compute_events: dict[Any, Event] = wrapper.cache_compute_events  # ty: ignore[unresolved-attribute]
 
             # Cleanup all expired keys
