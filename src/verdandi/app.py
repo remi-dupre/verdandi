@@ -106,7 +106,7 @@ async def canvas_prepare(
     logger.info("Next update at %s", next_update.isoformat())
 
     return RedirectResponse(
-        filename=str(entry_id),
+        filename=f"{entry_id}.png",
         refresh_rate=int(refresh_rate),
         url=AnyHttpUrl(
             os.path.join(
