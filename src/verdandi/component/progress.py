@@ -5,7 +5,7 @@ from verdandi.util.draw import xy_to_bounds, ShadeUniform, AbcShade
 
 
 def draw_vertical_pill(draw: ImageDraw, xy: tuple[int, int, int, int], progress: float):
-    assert 0.0 <= progress <= 1.0
+    progress = max(0.0, min(1.0, progress))
     (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
     gauge_y = int((1.0 - progress) * (y_max - y_min) + y_min)
 
@@ -22,7 +22,7 @@ def draw_progress(
     progress: float,
     fill: AbcShade = ShadeUniform(CL),
 ):
-    assert 0.0 <= progress <= 1.0
+    progress = max(0.0, min(1.0, progress))
     (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
     gauge_x = int(progress * (x_max - x_min) + x_min)
     draw.rounded_rectangle(xy, radius=4, width=1)

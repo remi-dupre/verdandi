@@ -44,6 +44,7 @@ class Widget(ABC, BaseModel):
     def _init_and_draw(self, **kwargs):
         res = Image.new(mode="L", size=(self.width(), self.height()), color=CW)
         draw = ImageDraw(res)
+        draw.fontmode = "1"
         self.draw(draw, **kwargs)
         return res
 
