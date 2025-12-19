@@ -1285,6 +1285,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "simpleeval" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -1309,6 +1310,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "simpleeval", specifier = ">=1.0" },
+    { name = "uvicorn", specifier = ">=0.38" },
 ]
 
 [package.metadata.requires-dev]
