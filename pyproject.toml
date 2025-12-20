@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 docgen = "scripts.docgen:run"
+check-icons-palette = "scripts.check_icons_palette:run"
 
 [dependency-groups]
 dev = [

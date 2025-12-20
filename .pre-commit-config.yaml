@@ -22,3 +22,10 @@ repos:
         types: [python]
         pass_filenames: false
         always_run: true
+
+      - id: check-icons-palette
+        name: check icons palette
+        language: python
+        entry: uv run check-icons-palette
+        pass_filenames: false
+        args: [--python=.venv/]

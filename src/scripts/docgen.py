@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import asyncio
 import json
 import typing
@@ -126,3 +127,7 @@ async def main():
 
 def run():
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run()
