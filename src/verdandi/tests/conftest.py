@@ -14,6 +14,7 @@ from httpx import ASGITransport, AsyncClient
 
 
 from verdandi.app import app
+from verdandi.state import AppState
 
 FIXTURES_PATH = Path(__file__).parent / "fixtures"
 
@@ -84,11 +85,42 @@ def base_url() -> str:
 
 
 @pytest.fixture
+def secret() -> str:
+    return "this-is-the-secret"
+
+
+@pytest.fixture
 async def client(base_url: str, monkeypatch, http) -> AsyncGenerator[AsyncClient]:
     test_config_path = FIXTURES_PATH / "test-config.yaml"
     test_env = {"VERDANDI_CONFIG_FILE": str(test_config_path)}
 
     with mock.patch.dict(os.environ, test_env, clear=True):
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url=base_url,
+        ) as client:
+            yield client
+
+
+@pytest.fixture
+async def client_with_secret(
+    base_url: str,
+    secret: str,
+    http: aiohttp.ClientSession,
+    monkeypatch,
+) -> AsyncGenerator[AsyncClient]:
+    test_config_path = FIXTURES_PATH / "test-config.yaml"
+    state = AppState.get_shared_state()
+
+    test_env = {
+        "VERDANDI_CONFIG_FILE": str(test_config_path),
+        "VERDANDI_SECRET": secret,
+    }
+
+    with (
+        mock.patch.dict(os.environ, test_env, clear=True),
+        mock.patch.object(state.configuration, "use_secret", True),
+    ):
         async with AsyncClient(
             transport=ASGITransport(app=app),
             base_url=base_url,

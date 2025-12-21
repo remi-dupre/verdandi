@@ -7,7 +7,13 @@ from typing import Annotated
 
 import aiohttp
 from PIL import Image
-from fastapi import FastAPI, Response, Path, Query
+from fastapi import (
+    Depends,
+    FastAPI,
+    Response,
+    Path,
+    Query,
+)
 from pydantic import BaseModel, AnyHttpUrl
 
 from verdandi.util.color import CW
@@ -15,8 +21,10 @@ from verdandi.state import DepState
 from verdandi.configuration import ApiConfiguration
 from verdandi.util.logging import async_log_duration
 from verdandi.util.image import image_to_bytes
+from verdandi.middlewares import auth_middleware
 
 logger = logging.getLogger(__name__)
+
 
 app = FastAPI(
     openapi_tags=[
@@ -24,12 +32,24 @@ app = FastAPI(
             "name": "canvas",
             "description": "Generate a new canvas through an asynchronous API.",
         },
-    ]
+    ],
+    dependencies=[Depends(auth_middleware)],
 )
 
 
+class RedirectResponse(BaseModel):
+    """
+    Response specified by trmnl's redirect API.
+    See https://help.usetrmnl.com/en/articles/11035846-redirect-plugin
+    """
+
+    filename: str
+    url: AnyHttpUrl
+    refresh_rate: int = 30 * 60
+
+
 @async_log_duration(logger, "Canvas generation")
-async def generate_canvas(configuration: ApiConfiguration, now: datetime):
+async def generate_canvas(configuration: ApiConfiguration, now: datetime) -> Response:
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
@@ -53,17 +73,6 @@ async def generate_canvas(configuration: ApiConfiguration, now: datetime):
         content=image_to_bytes(img),
         media_type="image/png",
     )
-
-
-class RedirectResponse(BaseModel):
-    """
-    Response specified by trmnl's redirect API.
-    See https://help.usetrmnl.com/en/articles/11035846-redirect-plugin
-    """
-
-    filename: str
-    url: AnyHttpUrl
-    refresh_rate: int = 30 * 60
 
 
 @app.get(

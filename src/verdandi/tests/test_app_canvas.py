@@ -10,6 +10,28 @@ async def test_direct(client: AsyncClient):
     assert resp.status_code == 200
 
 
+@pytest.mark.parametrize(
+    "query, expected_status",
+    [
+        ("/canvas/direct/", 401),
+        ("/canvas/redirect/", 401),
+        ("/canvas/redirect/?wait=true", 401),
+        ("/canvas/direct/?secret=not-the-secret", 403),
+        ("/canvas/direct/?secret={secret}", 200),
+        ("/canvas/redirect/?secret={secret}", 200),
+        ("/canvas/redirect/?wait=true&secret={secret}", 200),
+    ],
+)
+async def test_secret(
+    client_with_secret: AsyncClient,
+    secret: str,
+    query: str,
+    expected_status: int,
+):
+    resp = await client_with_secret.get(query.format(secret=secret))
+    assert resp.status_code == expected_status
+
+
 @pytest.mark.parametrize("wait", ["false", "true"])
 async def test_async(client: AsyncClient, wait: str):
     resp_new = await client.get("/canvas/redirect/", params={"wait": wait})

@@ -50,6 +50,7 @@ class ApiConfiguration(BaseModel):
     base_url: AnyHttpUrl
     size: tuple[int, int]
     widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]
+    use_secret: bool = False
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> "ApiConfiguration":
@@ -60,3 +61,14 @@ class ApiConfiguration(BaseModel):
             data = yaml.load(file, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
 
         return cls(**data)
+
+    def secret(self) -> str | None:
+        if not self.use_secret:
+            return None
+
+        secret = os.getenv("VERDANDI_SECRET")
+
+        if secret is None:
+            raise Exception("VERDANDI_SECRET is not set")
+
+        return secret
