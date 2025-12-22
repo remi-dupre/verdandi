@@ -114,15 +114,18 @@ async def canvas_prepare(
 
     logger.info("Next update at %s", next_update.isoformat())
 
+    url_str = os.path.join(
+        str(state.configuration.base_url),
+        f"canvas/redirect-get/{entry_id}/",
+    )
+
+    if (secret := state.configuration.secret()) is not None:
+        url_str += f"?secret={secret}"
+
     return RedirectResponse(
         filename=f"{entry_id}.png",
         refresh_rate=int(refresh_rate),
-        url=AnyHttpUrl(
-            os.path.join(
-                str(state.configuration.base_url),
-                f"canvas/redirect-get/{entry_id}/",
-            )
-        ),
+        url=AnyHttpUrl(url_str),
     )
 
 
