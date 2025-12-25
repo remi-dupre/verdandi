@@ -1,5 +1,5 @@
 import aiohttp
-from datetime import datetime
+from datetime import datetime, date
 from typing import AsyncGenerator
 from zoneinfo import ZoneInfo
 
@@ -28,7 +28,7 @@ async def ics(http: aiohttp.ClientSession) -> AsyncGenerator[ICSMetric]:
     yield await config.load(http)
 
 
-def test_velib(ics: ICSMetric):
+def test_upcoming(ics: ICSMetric):
     tz = ZoneInfo("Europe/Paris")
 
     assert ics.upcoming[0].summary == "Coiffeur"
@@ -50,3 +50,9 @@ def test_velib(ics: ICSMetric):
     assert ics.upcoming[8].date_start == datetime(2026, 1, 1, tzinfo=tz)
     assert ics.upcoming[8].date_end == datetime(2026, 1, 1, tzinfo=tz)
     assert ics.upcoming[8].calendar.label == "Holidays"
+
+
+def test_showcase_end_of_year(ics: ICSMetric):
+    tz = ZoneInfo("Europe/Paris")
+    dt = datetime(2025, 12, 31, 12, 0, tzinfo=tz)
+    assert ics.next_showcase_event(dt).date_start.date() == date(2026, 12, 25)

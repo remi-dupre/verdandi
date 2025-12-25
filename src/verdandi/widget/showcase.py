@@ -96,7 +96,7 @@ class Showcase2x1(Widget):
             logger.warning("No showcase event was found")
             return
 
-        remaining = (event.date_start - now).days
+        remaining = (event.date_start - now).days + 1
         text = f"Dans {remaining} jours"
         title_x = MARGIN
 

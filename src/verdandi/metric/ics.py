@@ -154,7 +154,7 @@ class ICSMetric(Metric):
 
     def next_showcase_event(self, now: datetime) -> ICSEvent | None:
         return next(
-            (event for event in self.showcase if event.date_end > now),
+            (event for event in self.showcase if (event.date_end - now).days >= 0),
             None,
         )
 
@@ -187,17 +187,15 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
         async with http.get(str(cal.url)) as resp:
             data = await resp.read()
 
-        events_res = await loop.run_in_executor(
+        return await loop.run_in_executor(
             executor,
             lambda: events(
                 string_content=data,
                 start=datetime(now.year, 1, 1, tzinfo=now.tzinfo),
-                end=now + timedelta(days=365),
+                end=now + timedelta(days=2 * 365),
                 strict=True,
             ),
         )
-
-        return events_res
 
     @async_time_cache(timedelta(hours=3))
     @async_log_duration(logger, "Loading all calendars")

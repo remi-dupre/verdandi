@@ -32,6 +32,15 @@ async def test_secret(
     assert resp.status_code == expected_status
 
 
+async def test_secret_redirect(client_with_secret: AsyncClient, secret: str):
+    resp = await client_with_secret.get(f"/canvas/redirect/?secret={secret}")
+    assert resp.status_code == 200
+
+    data = resp.json()
+    resp = await client_with_secret.get(data["url"])
+    assert resp.status_code == 200
+
+
 @pytest.mark.parametrize("wait", ["false", "true"])
 async def test_async(client: AsyncClient, wait: str):
     resp_new = await client.get("/canvas/redirect/", params={"wait": wait})
