@@ -97,8 +97,15 @@ class Showcase2x1(Widget):
             return
 
         remaining = (event.date_start - now).days + 1
-        text = f"Dans {remaining} jours"
         title_x = MARGIN
+
+        match remaining:
+            case 0:
+                text = "Aujourd'hui"
+            case 1:
+                text = "Demain"
+            case _:
+                text = f"Dans {remaining} jours"
 
         if icon := summary_to_category(event.summary):
             draw_icon(draw, (title_x, 9), "small-" + icon)
