@@ -2,16 +2,15 @@ from datetime import datetime, timedelta
 
 from PIL.ImageDraw import ImageDraw
 
-from verdandi.widget.abs_widget import Widget
-from verdandi.component.text import Font, draw_text
-from verdandi.component.progress import draw_vertical_pill
-from verdandi.component.icon import draw_icon
 from verdandi.component.curve import draw_curve
-from verdandi.metric.weather import WeatherMetric, WeatherConfig
-from verdandi.util.date import weekday_humanized
+from verdandi.component.icon import draw_icon
+from verdandi.component.progress import draw_vertical_pill
+from verdandi.component.text import Font, draw_text
+from verdandi.metric.weather import WeatherConfig, WeatherMetric
+from verdandi.util.color import CB, CD, CL, CW
+from verdandi.util.date import next_time_cadenced, weekday_humanized
 from verdandi.util.draw import ShadeMatrix
-from verdandi.util.color import CL, CW, CD
-from verdandi.util.date import next_time_cadenced
+from verdandi.widget.abs_widget import Widget
 
 MARGIN = 6
 MIN_CURVE_RANGE = 10.0
@@ -34,7 +33,7 @@ FILL_NIGHT = ShadeMatrix(
 # Dashed lanes on the curve are represented with a matrix with same column
 # alignment as fills which allows to control which part of the pattern may
 # be overriden or not.
-DASHED_LINE = [CW] * 4 + [CD] * 3 + [CW] * 2
+DASHED_LINE = [CW] * 4 + [CB] * 3 + [CW] * 2
 DASHED_SCALE = ShadeMatrix(DASHED_LINE, [CW], DASHED_LINE, [CW])
 
 
@@ -189,14 +188,22 @@ class WeatherRecap3x2(Widget):
         first_hour = curr_time.hour if curr_time.minute < 30 else curr_time.hour + 1
 
         # Offset induced by current minutes
-        minutes_offset = (self.width() - 28) * curr_time.minute // (24 * 60)
+        minutes_offset = (
+            (self.width() - curve_x_pos - 14) * curr_time.minute // (24 * 60)
+        )
 
         # If minutes induce no offset, then there is room to display an extra column
         displayed_range = 25 if minutes_offset == 0 else 24
 
         for i in range(0, displayed_range, 2):
             hour = first_hour + i
-            x = curve_x_pos + minutes_offset + (self.width() - 28) * i // 24
+
+            x = (
+                curve_x_pos
+                + minutes_offset
+                + (self.width() - curve_x_pos - 14) * i // 24
+            )
+
             draw_text(draw, (x, 160), Font.SMALL, f"{(hour % 24):02}h", anchor="ma")
 
             draw_text(
