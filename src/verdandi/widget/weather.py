@@ -13,8 +13,8 @@ from verdandi.util.draw import ShadeMatrix
 from verdandi.util.color import CL, CW, CD
 from verdandi.util.date import next_time_cadenced
 
-
 MARGIN = 6
+MIN_CURVE_RANGE = 10.0
 
 
 FILL_DAY = ShadeMatrix(
@@ -30,6 +30,12 @@ FILL_NIGHT = ShadeMatrix(
     [CL, CW, CD, CW],
     [CW, CW, CW, CW],
 )
+
+# Dashed lanes on the curve are represented with a matrix with same column
+# alignment as fills which allows to control which part of the pattern may
+# be overriden or not.
+DASHED_LINE = [CW] * 4 + [CD] * 3 + [CW] * 2
+DASHED_SCALE = ShadeMatrix(DASHED_LINE, [CW], DASHED_LINE, [CW])
 
 
 class WeatherRecap3x2(Widget):
@@ -78,7 +84,7 @@ class WeatherRecap3x2(Widget):
             draw,
             (200, 18),
             Font.XMEDIUM_BOLD,
-            f"{round(today_temp_min)}°-{round(today_temp_max)}°",
+            f"{round(today_temp_min)}°|{round(today_temp_max)}°",
         )
 
         # Section: apparent temperature
@@ -112,21 +118,35 @@ class WeatherRecap3x2(Widget):
         # == Draw curve
 
         # Find temperature bounds for the next two days
-        temp_min = min(
-            min(x.temperature for x in weather.hourly[:49]),
-            weather.temperature,
+        temp_min, temp_max = weather.temerature_bounds(
+            curr_dt,
+            curr_dt + timedelta(hours=24.0),
         )
 
-        temp_max = max(
-            max(x.temperature for x in weather.hourly[:49]),
-            weather.temperature,
-        )
+        displayed_min = 0.0 if temp_min > 0.0 else temp_min
+        displayed_max = 0.0 if temp_max < 0.0 else temp_max
+
+        if displayed_max - displayed_min < MIN_CURVE_RANGE:
+            missing_space = MIN_CURVE_RANGE - displayed_max + displayed_min
+            displayed_min -= missing_space / 2
+            displayed_max += missing_space / 2
+
+        scale_precision = 5 if displayed_max - displayed_min < 20 else 10
+
+        def temp_y_coord(temp: float) -> float:
+            return (temp - displayed_min) / (displayed_max - displayed_min)
+
+        displayed_scale = [
+            (f"{temp}°", temp_y_coord(temp), DASHED_SCALE)
+            for temp in range(int(displayed_min), int(displayed_max) + 1)
+            if temp % scale_precision == 0
+        ]
 
         # Section: hourly
         def temp_func(x: float) -> float:
             dt = curr_dt + timedelta(hours=24.0 * x)
-            y = weather.interpolate_temperature_at(dt)
-            return 0.1 + 0.9 * (y - temp_min) / (temp_max - temp_min)
+            temp = weather.interpolate_temperature_at(dt)
+            return temp_y_coord(temp)
 
         # Shade the curve between sunset & surise
         next_date = curr_date + timedelta(days=1)
@@ -153,7 +173,15 @@ class WeatherRecap3x2(Widget):
             )
         )
 
-        draw_curve(draw, (14, 90, self.width() - 14, 150), temp_func, shade_parts)
+        curve_x_pos = 20
+
+        draw_curve(
+            draw,
+            (curve_x_pos, 90, self.width() - curve_x_pos, 150),
+            temp_func,
+            shade_parts,
+            displayed_scale,
+        )
 
         # == Draw Table
 
@@ -168,7 +196,7 @@ class WeatherRecap3x2(Widget):
 
         for i in range(0, displayed_range, 2):
             hour = first_hour + i
-            x = 14 + minutes_offset + (self.width() - 28) * i // 24
+            x = curve_x_pos + minutes_offset + (self.width() - 28) * i // 24
             draw_text(draw, (x, 160), Font.SMALL, f"{(hour % 24):02}h", anchor="ma")
 
             draw_text(
@@ -237,7 +265,7 @@ class WeatherWeek3x1(Widget):
                 draw,
                 (pos_x + 48, pos_y + 16),
                 Font.XMEDIUM_BOLD,
-                f"{round(day.temperature_min)}°-{round(day.temperature_max)}°",
+                f"{round(day.temperature_min)}°|{round(day.temperature_max)}°",
             )
 
         draw.point([(x, MARGIN + 48) for x in range(21, self.width() - 20, 3)])

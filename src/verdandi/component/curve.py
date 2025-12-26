@@ -2,8 +2,9 @@ from typing import Callable
 
 from PIL.ImageDraw import ImageDraw
 
-from verdandi.util.color import CB
+from verdandi.util.color import CB, CL
 from verdandi.util.draw import xy_to_bounds, AbcShade, ShadeUniform
+from verdandi.component.text import draw_text, Font
 
 
 def draw_curve(
@@ -11,6 +12,7 @@ def draw_curve(
     xy: tuple[int, int, int, int],
     curve: Callable[[float], float],
     shade_parts: list[tuple[float, AbcShade]] = [(1.0, ShadeUniform(CB))],
+    displayed_scale: list[tuple[str, float, AbcShade]] = [],
 ):
     assert len(shade_parts) > 0
     (x_min, x_max), (y_min, y_max) = xy_to_bounds(xy)
@@ -19,10 +21,6 @@ def draw_curve(
         y_min + int((y_max - y_min) * (1.0 - curve((x - x_min) / (x_max - x_min))))
         for x in range(x_min, x_max + 1)
     ]
-
-    # Draw the outline of the curve
-    draw.point([(x_min + dx, y) for dx, y in enumerate(min_height)])
-    draw.point([(x_min + dx, y - 1) for dx, y in enumerate(min_height)])
 
     # Draw each section with its own density
     prev_cursor = 0.0
@@ -41,3 +39,13 @@ def draw_curve(
                 for y in range(min_height[x - x_min], y_max + 1)
             ),
         )
+
+    # Draw intermediary lines
+    for label, scale_pos, shade in displayed_scale:
+        scale_y = y_min + int((y_max - y_min) * (1.0 - scale_pos)) + 2
+        shade.fill_rect(draw, (x_min, scale_y, x_max, scale_y + 1))
+        draw_text(draw, (x_min, scale_y), Font.SMALL, label, anchor="rm", color=CL)
+
+    # Draw the outline of the curve
+    draw.point([(x_min + dx, y) for dx, y in enumerate(min_height)])
+    draw.point([(x_min + dx, y - 1) for dx, y in enumerate(min_height)])

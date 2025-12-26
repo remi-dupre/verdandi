@@ -106,6 +106,19 @@ class WeatherMetric(Metric):
             + last_point.temperature * progress
         )
 
+    def temerature_bounds(
+        self,
+        dt_min: datetime,
+        dt_max: datetime,
+    ) -> tuple[float, float]:
+        temperatures = [
+            pt.temperature for pt in self.hourly if dt_min <= pt.time <= dt_max
+        ]
+
+        temperatures.append(self.interpolate_temperature_at(dt_min))
+        temperatures.append(self.interpolate_temperature_at(dt_max))
+        return min(temperatures), max(temperatures)
+
 
 class WeatherConfig(MetricConfig[WeatherMetric], frozen=True):
     timezone: str = Field(description="your local timezone")
