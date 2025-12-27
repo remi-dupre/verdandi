@@ -13,7 +13,7 @@ from verdandi.util.draw import ShadeMatrix
 from verdandi.widget.abs_widget import Widget
 
 MARGIN = 6
-MIN_CURVE_RANGE = 10.0
+MIN_CURVE_RANGE = 6.0
 
 
 FILL_DAY = ShadeMatrix(
@@ -55,7 +55,7 @@ class WeatherRecap3x2(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, weather: WeatherMetric):
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):  # ty: ignore[invalid-method-override]
         # Get biggest hour of the day that's before current time
         curr_date = weather.time.date()
         curr_time = weather.time.time()
@@ -179,7 +179,8 @@ class WeatherRecap3x2(Widget):
             (curve_x_pos, 90, self.width() - curve_x_pos, 150),
             temp_func,
             shade_parts,
-            displayed_scale,
+            y_scale=displayed_scale,
+            y_origin=temp_y_coord(0.0),
         )
 
         # == Draw Table
@@ -244,7 +245,7 @@ class WeatherWeek3x1(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, weather: WeatherMetric):
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):  # ty:ignore[invalid-method-override]
         cell_width = 128
         cell_height = 50
 

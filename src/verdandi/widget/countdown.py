@@ -26,7 +26,7 @@ class Countdown2x1(Widget):
             date_end=date.fromisoformat("2030-01-01"),
         )
 
-    def draw(self, draw: ImageDraw):
+    def draw(self, draw: ImageDraw):  # ty:ignore[invalid-method-override]
         now = date.today()
 
         if now < self.date_end:

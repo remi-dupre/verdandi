@@ -1,14 +1,16 @@
 import functools
 import logging
 from time import time
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Coroutine
 
 
 def async_log_duration[**P, R](
     logger: logging.Logger,
     text: str,
-) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
-    def decorator(func: Callable[..., Awaitable[R]]) -> Callable[..., Awaitable[R]]:
+) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Coroutine[None, None, R]]]:
+    def decorator(
+        func: Callable[..., Awaitable[R]],
+    ) -> Callable[..., Coroutine[None, None, R]]:
         @functools.wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             start_time = time()

@@ -55,4 +55,4 @@ def test_upcoming(ics: ICSMetric):
 def test_showcase_end_of_year(ics: ICSMetric):
     tz = ZoneInfo("Europe/Paris")
     dt = datetime(2025, 12, 31, 12, 0, tzinfo=tz)
-    assert ics.next_showcase_event(dt).date_start.date() == date(2026, 12, 25)
+    assert ics.next_showcase_event(dt).date_start.date() == date(2026, 12, 25)  # ty:ignore[possibly-missing-attribute]

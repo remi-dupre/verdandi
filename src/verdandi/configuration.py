@@ -14,7 +14,7 @@ from verdandi.widget import ALL_WIDGETS
 logger = logging.getLogger(__name__)
 
 
-def widget_config_for(widget_type):
+def widget_config_for(widget_type) -> type[BaseModel]:
     class WidgetConfiguration(BaseModel):
         name: Literal[widget_type.name]  # ty: ignore[invalid-type-form]
         position: tuple[int, int]
@@ -43,13 +43,15 @@ def widget_config_for(widget_type):
     return WidgetConfiguration
 
 
-_all_widget_configs = [widget_config_for(w) for w in ALL_WIDGETS]
+_all_widget_configs: tuple[type[BaseModel], ...] = tuple(
+    widget_config_for(w) for w in ALL_WIDGETS
+)
 
 
 class ApiConfiguration(BaseModel):
     base_url: AnyHttpUrl
     size: tuple[int, int]
-    widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]
+    widgets: list[Annotated[Union[*_all_widget_configs], Field(discriminator="name")]]  # ty:ignore[invalid-type-form]
     use_secret: bool = False
 
     @classmethod

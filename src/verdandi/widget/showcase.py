@@ -50,7 +50,7 @@ class Showcase2x1(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, ics: ICSMetric):
+    def draw(self, draw: ImageDraw, ics: ICSMetric):  # ty:ignore[invalid-method-override]
         tz = ZoneInfo(self.ics.timezone)
         now = datetime.now(tz)
         year_start = date(now.year, 1, 1)

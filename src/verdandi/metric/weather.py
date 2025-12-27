@@ -80,8 +80,8 @@ class WeatherMetric(Metric):
     weather_code: WeatherCode
     sunrise: time
     sunset: time
-    daily: list[DailyData] = conlist(DailyData, min_length=7, max_length=7)
-    hourly: list[HourlyData] = conlist(HourlyData, min_length=49, max_length=49)
+    daily: conlist(DailyData, min_length=7, max_length=7)  # ty:ignore[invalid-type-form]
+    hourly: conlist(HourlyData, min_length=7 * 24, max_length=7 * 24)  # ty:ignore[invalid-type-form]
 
     def interpolate_temperature_at(self, dt: datetime) -> float:
         """

@@ -23,11 +23,11 @@ def invalid_colors(img: Image.Image) -> set[int]:
     palette = {CW, CB, CL, CD}
 
     return {
-        int(img.getpixel((x, y)))
+        img.getpixel((x, y))
         for x in range(img.size[0])
         for y in range(img.size[1])
         if img.getpixel((x, y)) not in palette
-    }
+    }  # ty:ignore[invalid-return-type]
 
 
 def image_to_bytes(img: Image.Image) -> bytes:

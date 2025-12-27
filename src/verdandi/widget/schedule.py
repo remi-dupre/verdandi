@@ -59,7 +59,7 @@ class Schedule3x4(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, ics: ICSMetric):
+    def draw(self, draw: ImageDraw, ics: ICSMetric):  # ty:ignore[invalid-method-override]
         SHADE_TIMELINE_BACKGROUND.fill_rect(
             draw,
             (MARGIN, MARGIN, MARGIN + 17, self.height() - 2 * MARGIN),
