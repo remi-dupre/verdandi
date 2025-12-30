@@ -1,9 +1,10 @@
 from functools import lru_cache
 
 CATEGORY_MAPPING = {
+    "unknown": ["tbc", "???"],
     "christmas-tree": ["🎄", "noël"],
     "heart": [*"❤💍", "couple"],
-    "present": ["🎂", "anniversaire"],
+    "present": ["🎂", "anniversaire", "anniv"],
     "beer": [*"🍺🍻🍸", "cocktail", "bière", "verre"],
     "coffee": ["☕", "café", "brunch", "goûter"],
     "tablewear": ["🍽️", "dîner", "diner", "déjeuner", "repas"],
@@ -13,6 +14,7 @@ CATEGORY_MAPPING = {
     "shopping": [*"🛍🛒", "courses"],
     "work": ["séminaire", "travail", "entretiens"],
     "train": [*"🚂🚆🚉🚄🛤🚅🚃", "train"],
+    "suitcase": ["🧳", "voyage"],
 }
 
 
