@@ -15,6 +15,9 @@ from verdandi.widget.abs_widget import Widget
 MARGIN = 6
 MIN_CURVE_RANGE = 6.0
 
+# Display a different sunny icon when it's cold
+EASTER_EGG_COLD_SUN_THRESHOLD = 8  # °C
+
 
 FILL_DAY = ShadeMatrix(
     [CW, CW, CL, CW],
@@ -66,8 +69,16 @@ class WeatherRecap3x2(Widget):
         today_temp_min = weather.daily[0].temperature_min
         today_temp_max = weather.daily[0].temperature_max
 
-        # Secttion: temperature and weather now
-        draw_icon(draw, (MARGIN, 22), "xlarge-" + weather.weather_code.value)
+        # Section: temperature and weather now
+        xlarge_icon = "xlarge-" + weather.weather_code.value
+
+        if (
+            xlarge_icon == "xlarge-clear"
+            and weather.temperature < EASTER_EGG_COLD_SUN_THRESHOLD
+        ):
+            xlarge_icon += "-cold"
+
+        draw_icon(draw, (MARGIN, 22), xlarge_icon)
         draw_text(draw, (75, 10), Font.XLARGE, f"{round(weather.temperature)}°")
 
         # Section: min & max temperature
