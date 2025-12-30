@@ -18,6 +18,7 @@ from verdandi.util.draw import apply_mask_at
 MARGIN = 3
 MARGIN_LINES = 4
 MARGIN_DAY = 8
+NEWLINE_OFFSET = 10
 
 DAY_SEPARATOR = Image.open(DIR_DATA / "ui" / "calendar-day-separator.png").convert(
     mode="L"
@@ -182,9 +183,9 @@ class Schedule3x4(Widget):
 
                 text_area = TextArea(
                     draw=draw,
-                    bounds=(28, y_pos, self.width() - MARGIN, None),
+                    bounds=(28 + NEWLINE_OFFSET, y_pos, self.width() - MARGIN, None),
                     line_height=22,
-                    cursor=(initial_cursor_x, 0),
+                    cursor=(initial_cursor_x - NEWLINE_OFFSET, 0),
                 )
 
                 text_area.draw_text(Font.XMEDIUM, keep_ascii(event.summary))
