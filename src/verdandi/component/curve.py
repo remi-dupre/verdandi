@@ -5,7 +5,6 @@ from PIL.ImageDraw import ImageDraw
 from verdandi.util.color import CB, CL
 from verdandi.util.draw import xy_to_bounds, AbcShade, ShadeUniform
 from verdandi.component.text import draw_text, Font
-from verdandi.util.common import min_max
 
 
 def draw_curve(
@@ -39,13 +38,17 @@ def draw_curve(
             (
                 (x, y)
                 for x in range(x_start, x_end + 1)
-                for y in range(*min_max(min_height[x - x_min], y_origin_coord + 1))
+                for y in (
+                    range(min_height[x - x_min], y_origin_coord + 1)
+                    if min_height[x - x_min] < y_origin_coord
+                    else range(y_origin_coord, min_height[x - x_min] + 1)
+                )
             ),
         )
 
-    # Draw intermediary lines
+    # Draw scale lines
     for label, scale_pos, shade in y_scale:
-        scale_y = y_min + int((y_max - y_min) * (1.0 - scale_pos)) + 2
+        scale_y = y_min + int((y_max - y_min) * (1.0 - scale_pos))
         shade.fill_rect(draw, (x_min, scale_y, x_max, scale_y + 1))
         draw_text(draw, (x_min, scale_y), Font.SMALL, label, anchor="rm", color=CL)
 
