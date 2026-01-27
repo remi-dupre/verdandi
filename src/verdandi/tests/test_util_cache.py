@@ -88,11 +88,13 @@ async def test_concurrent_crash():
         task_1 = asyncio.create_task(crash_once())
         await asyncio.sleep(0.0)
         task_2 = asyncio.create_task(crash_once())
+        task_3 = asyncio.create_task(crash_once())
 
         with pytest.raises(FirstCrash):
             await task_1
 
         assert await task_2 == 2
+        assert await task_3 == 2
 
     with time_machine.travel(t2):
         assert await crash_once() == 2
