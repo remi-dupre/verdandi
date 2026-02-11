@@ -8,7 +8,7 @@ CATEGORY_MAPPING = {
     "beer": [*"🍺🍻🍸", "cocktail", "bière", "verre"],
     "coffee": ["☕", "café", "brunch", "goûter"],
     "tablewear": ["🍽️", "dîner", "diner", "déjeuner", "repas"],
-    "medical": [*"🩸💉🩺🧑🏽‍⚕"],
+    "medical": [*"🩸💉🩺🧑🏽‍⚕", "médecin", "docteur", "dentiste"],
     "music": [*"🎵🎶🎤", "concert"],
     "scissors": ["✂", "coiffeur"],
     "shopping": [*"🛍🛒", "courses"],
