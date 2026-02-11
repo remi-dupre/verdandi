@@ -4,15 +4,15 @@ from time import time
 from typing import Awaitable, Callable, Coroutine
 
 
-def async_log_duration[**P, R](
+def async_log_duration[**P1, R1](
     logger: logging.Logger,
     text: str,
-) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Coroutine[None, None, R]]]:
-    def decorator(
-        func: Callable[..., Awaitable[R]],
-    ) -> Callable[..., Coroutine[None, None, R]]:
+) -> Callable[[Callable[P1, Awaitable[R1]]], Callable[P1, Coroutine[None, None, R1]]]:
+    def decorator[**P2, R2](
+        func: Callable[P2, Awaitable[R2]],
+    ) -> Callable[P2, Coroutine[None, None, R2]]:
         @functools.wraps(func)
-        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        async def wrapper(*args: P2.args, **kwargs: P2.kwargs) -> R2:
             start_time = time()
 
             try:

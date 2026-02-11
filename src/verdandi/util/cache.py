@@ -2,7 +2,7 @@ import functools
 import logging
 from asyncio import Event
 from datetime import datetime, timedelta
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Coroutine
 
 import aiohttp
 from pydantic import BaseModel
@@ -23,18 +23,18 @@ class CacheSlot[T](BaseModel):
     value: T
 
 
-def async_time_cache[**P, R](
+def async_time_cache[**P1, R1](
     persistance: timedelta,
-) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
+) -> Callable[[Callable[P1, Awaitable[R1]]], Callable[P1, Coroutine[None, None, R1]]]:
     """
     Ensure the function is not executed twice in a given period of time.
     """
 
-    def decorator(
-        func: Callable[..., Awaitable[R]],
-    ) -> Callable[..., Awaitable[R]]:
+    def decorator[**P2, R2](
+        func: Callable[P2, Awaitable[R2]],
+    ) -> Callable[P2, Coroutine[None, None, R2]]:
         @functools.wraps(func)
-        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        async def wrapper(*args: P2.args, **kwargs: P2.kwargs) -> R2:
             cache_params = (*args, KWD_MARK, *sorted(kwargs.items()))
 
             cache_key = tuple(

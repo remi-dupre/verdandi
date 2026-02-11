@@ -4,10 +4,12 @@ from verdandi.widget.velib import Velib1x1
 from verdandi.widget.weather import WeatherRecap3x2, WeatherWeek3x1
 from verdandi.widget.showcase import Showcase2x1
 from verdandi.widget.calendar import Calendar1x1
+from verdandi.widget.debug_icons import DebugIcons3x4
 
 ALL_WIDGETS = [
     Calendar1x1,
     Countdown2x1,
+    DebugIcons3x4,
     Schedule3x4,
     Showcase2x1,
     Velib1x1,

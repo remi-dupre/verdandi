@@ -58,6 +58,28 @@
     date_end: '2030-01-01'
 
 ```
+## DebugIcons3x4
+
+![debug-icons-3x4](./images/widgets/debug-icons-3x4.png)
+
+| | value |
+|---|---|
+| **name** | debug-icons-3x4 |
+| **width** | 399 |
+| **height** | 480 |
+
+### Configuration parameters
+
+| param | type | description |
+|---|---|---|
+
+### Configuration Example
+
+```yaml
+- name: debug-icons-3x4
+  config: {}
+
+```
 ## Schedule3x4
 
 ![schedule-3x4](./images/widgets/schedule-3x4.png)

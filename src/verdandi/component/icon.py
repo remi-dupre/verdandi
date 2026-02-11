@@ -16,6 +16,22 @@ def _load_icon(icon_name: str) -> Image.Image:
     return img.convert(mode="L")
 
 
+def list_icons() -> list[str]:
+    result = []
+
+    for _, _, filenames in DIR_ICONS.walk():
+        for filename in filenames:
+            if filename.endswith(".png"):
+                result.append(filename.removesuffix(".png"))
+
+    return result
+
+
+def icon_size(icon_name: str) -> tuple[int, int]:
+    icon = _load_icon(icon_name)
+    return icon.size
+
+
 def draw_icon(draw: ImageDraw, xy: tuple[int, int], icon_name: str):
     icon = _load_icon(icon_name)
     draw._image.paste(icon, xy)
