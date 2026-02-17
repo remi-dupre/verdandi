@@ -15,6 +15,7 @@ CATEGORY_MAPPING = {
     "work": ["séminaire", "travail", "entretiens"],
     "train": [*"🚂🚆🚉🚄🛤🚅🚃", "train", "gare"],
     "suitcase": ["🧳", "voyage"],
+    "gamepad": [*"👾🕹🎮", "gaming", "game", "g@ming", "g@me"],
 }
 
 
