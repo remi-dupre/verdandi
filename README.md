@@ -18,7 +18,7 @@ $ pre-commit install
 This will start the server on port _8000_:
 
 ```shell
-$ uv run fastapi dev src/verdandi/main.py
+$ uv run fastapi dev src/verdandi/app.py
 ```
 
 ## Scripts

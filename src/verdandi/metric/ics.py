@@ -91,22 +91,13 @@ class ICSEvent(BaseModel):
             if f"verdandi:{label.value}" in (event.description or "").lower()
         }
 
-        res = cls(
+        return cls(
             summary=event.summary or "",
             calendar=calendar,
             date_start=date_start,
             date_end=date_end,
             labels=labels,
         )
-
-        if "Fian" in res.summary:
-            print("--")
-            print(event)
-            print(res)
-            print(event.time_left)
-            # print(event.rdates)
-
-        return res
 
     def is_full_day(self, day: date) -> bool:
         """
@@ -195,9 +186,6 @@ class ICSConfig(MetricConfig[ICSMetric], frozen=True):
 
         async with http.get(str(cal.url)) as resp:
             data = await resp.read()
-
-        for event in events(string_content=data):
-            print(event, event.__dict__)
 
         return await loop.run_in_executor(
             executor,
