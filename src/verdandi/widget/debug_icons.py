@@ -18,7 +18,7 @@ class DebugIcons3x4(Widget):
 
     def draw(self, draw: ImageDraw):  # ty:ignore[invalid-method-override]
         icons = list_icons()
-        icons.sort(key=lambda icon: icon_size(icon)[0], reverse=True)
+        icons.sort(key=lambda icon: (icon_size(icon)[0], icon), reverse=True)
 
         curr_height = 0
         curr_x = MARGIN
