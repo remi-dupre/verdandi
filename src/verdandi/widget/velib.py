@@ -27,7 +27,7 @@ class Velib1x1(Widget):
     def example(cls) -> "Velib1x1":
         return Velib1x1(velib=VelibConfig(station_id=213686196))
 
-    def draw(self, draw: ImageDraw, velib: VelibMetric):  # ty:ignore[invalid-method-override]
+    def draw(self, draw: ImageDraw, velib: VelibMetric):
         occupied = velib.mechanical + velib.electric
 
         draw_gauge(

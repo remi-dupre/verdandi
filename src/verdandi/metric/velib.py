@@ -22,7 +22,7 @@ class VelibMetric(Metric):
     capacity: int
 
 
-class VelibConfig(MetricConfig[VelibMetric]):
+class VelibConfig(MetricConfig[VelibMetric], frozen=True):
     API_URL: ClassVar[str] = (
         "https://velib-metropole-opendata.smovengo.cloud/opendata/Velib_Metropole"
     )

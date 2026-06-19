@@ -16,7 +16,7 @@ class DebugIcons3x4(Widget):
     def example(cls) -> "DebugIcons3x4":
         return DebugIcons3x4()
 
-    def draw(self, draw: ImageDraw):  # ty:ignore[invalid-method-override]
+    def draw(self, draw: ImageDraw):
         icons = list_icons()
         icons.sort(key=lambda icon: icon_size(icon)[0], reverse=True)
 

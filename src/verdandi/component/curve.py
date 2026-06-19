@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Callable
 
 from PIL.ImageDraw import ImageDraw
@@ -12,7 +13,7 @@ def draw_curve(
     xy: tuple[int, int, int, int],
     curve: Callable[[float], float],
     shade_parts: list[tuple[float, AbcShade]] = [(1.0, ShadeUniform(CB))],
-    y_scale: list[tuple[str, float, AbcShade]] = [],
+    y_scale: Sequence[tuple[str, float, AbcShade]] = [],
     y_origin: float = 0.0,
 ):
     assert len(shade_parts) > 0

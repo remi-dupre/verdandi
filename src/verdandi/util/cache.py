@@ -86,8 +86,8 @@ def async_time_cache[**P1, R1](
                 compute_event.set()
                 del cache_compute_events[cache_key]
 
-        wrapper.cache_store: dict[Any, CacheSlot] = {}
-        wrapper.cache_compute_events: dict[Any, Event] = {}
+        wrapper.cache_store = {}  # ty: ignore[unresolved-attribute]
+        wrapper.cache_compute_events = {}  # ty: ignore[unresolved-attribute]
         return wrapper
 
     return decorator

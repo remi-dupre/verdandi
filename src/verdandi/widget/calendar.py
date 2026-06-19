@@ -38,7 +38,7 @@ class Calendar1x1(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, ics: ICSMetric):  # ty:ignore[invalid-method-override]
+    def draw(self, draw: ImageDraw, ics: ICSMetric):
         today = date.today()
         month_start = today.replace(day=1)
         first_day = month_start - timedelta(days=month_start.weekday())

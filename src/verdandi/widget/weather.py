@@ -58,7 +58,7 @@ class WeatherRecap3x2(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, weather: WeatherMetric):  # ty: ignore[invalid-method-override]
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):
         # Get biggest hour of the day that's before current time
         curr_date = weather.time.date()
         curr_time = weather.time.time()
@@ -256,7 +256,7 @@ class WeatherWeek3x1(Widget):
             )
         )
 
-    def draw(self, draw: ImageDraw, weather: WeatherMetric):  # ty:ignore[invalid-method-override]
+    def draw(self, draw: ImageDraw, weather: WeatherMetric):
         cell_width = 128
         cell_height = 50
 

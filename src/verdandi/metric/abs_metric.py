@@ -7,7 +7,7 @@ from pydantic import BaseModel
 M = TypeVar("M")
 
 
-class MetricConfig(ABC, BaseModel, Generic[M]):
+class MetricConfig(ABC, BaseModel, Generic[M], frozen=True):
     @classmethod
     @abstractmethod
     async def load(self, http: aiohttp.ClientSession) -> M:
