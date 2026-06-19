@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiodns>=4.0.4",
     "aiohttp<3.14",
     "fastapi>=0.116.1",
     "fastapi-cli>=0.0.8",
@@ -30,7 +31,7 @@ dev = [
     "pytest>=8.4.1",
     "ruff>=0.12.4",
     "time-machine>=2.16.0",
-    "ty>=0.0.1a15",
+    "ty>=0.0.51", 
 ]
 
 [tool.uv]

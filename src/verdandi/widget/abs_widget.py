@@ -61,8 +61,8 @@ class Widget(ABC, BaseModel):
     async def render(self, http: aiohttp.ClientSession) -> Image.Image:
         @retry(
             retry=retry_if_exception_type(aiohttp.ClientConnectorDNSError),
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(min=1, max=4),
+            stop=stop_after_attempt(6),
+            wait=wait_exponential(min=1, max=8),
             before_sleep=before_sleep_log(logger, logging.WARNING),
             reraise=True,
         )
