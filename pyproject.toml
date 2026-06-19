@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.12.14",
+    "aiohttp<3.14",
     "fastapi>=0.116.1",
     "fastapi-cli>=0.0.8",
     "icalevents>=0.2.1",
