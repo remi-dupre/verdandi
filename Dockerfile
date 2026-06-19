@@ -15,6 +15,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.13-alpine
 
+RUN addgroup -g 1000 app && adduser -u 1000 -G app -D app
+USER app
+
 COPY --from=builder /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
@@ -25,5 +28,5 @@ CMD [ \
     "uvicorn", \
     "--log-config", "src/log-config.json", \
     "--host", "0.0.0.0", \
-    "--port", "80", \
+    "--port", "8000", \
     "src.verdandi.app:app" ]
