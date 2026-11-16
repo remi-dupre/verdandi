@@ -9,6 +9,10 @@ WORKDIR /app
 
 COPY . /app
 
+RUN apk add --no-cache \
+    musl-dev \
+    gcc
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
