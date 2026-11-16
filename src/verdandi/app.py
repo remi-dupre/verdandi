@@ -2,6 +2,7 @@ import logging
 import asyncio
 import os
 from datetime import datetime
+from io import BytesIO
 from uuid import UUID, uuid4
 from typing import Annotated
 
@@ -16,7 +17,7 @@ from fastapi import (
 )
 from pydantic import BaseModel, AnyHttpUrl
 
-from verdandi.util.color import CW
+from verdandi.util.color import CW, map_simulate_eink
 from verdandi.state import DepState
 from verdandi.configuration import ApiConfiguration
 from verdandi.util.logging import async_log_duration
@@ -49,7 +50,11 @@ class RedirectResponse(BaseModel):
 
 
 @async_log_duration(logger, "Canvas generation")
-async def generate_canvas(configuration: ApiConfiguration, now: datetime) -> Response:
+async def generate_canvas(
+    configuration: ApiConfiguration,
+    now: datetime,
+    simulate_eink: bool = False,
+) -> Response:
     # Render all widgets concurently
     connector = aiohttp.TCPConnector(ssl=False)  # TODO: is this a NixOS issue?
 
@@ -68,11 +73,19 @@ async def generate_canvas(configuration: ApiConfiguration, now: datetime) -> Res
     for widget, widget_img in zip(displayed_widgets, widget_imgs):
         img.paste(widget_img, widget.position)
 
+    if simulate_eink:
+        pixels = [map_simulate_eink(col) for col in img.getdata()]  # ty: ignore
+        img.putdata(pixels)
+
+        buffer = BytesIO()
+        img.save(buffer, "png")
+        buffer.seek(0)
+        content = buffer.read()
+    else:
+        content = image_to_bytes(img)
+
     # Encode image to a buffer and respond
-    return Response(
-        content=image_to_bytes(img),
-        media_type="image/png",
-    )
+    return Response(content=content, media_type="image/png")
 
 
 @app.get(
@@ -156,6 +169,9 @@ async def canvas_retreive(
 )
 async def canvas_direct(
     state: DepState,
+    simulate_eink: Annotated[
+        bool, Query(title="Map eink color tones for an LCD screen")
+    ] = False,
 ):
     now = datetime.now().astimezone()
-    return await generate_canvas(state.configuration, now)
+    return await generate_canvas(state.configuration, now, simulate_eink)
