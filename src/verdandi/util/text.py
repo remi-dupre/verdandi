@@ -20,6 +20,7 @@ CATEGORY_MAPPING = {
     "phone": [*"📞☎️☎🤙", "appel", "téléphone", "call"],
     "truck": [*"🚚🚛📦📨", "livraison", "commande"],
     "pencil": [*"✏️📝📄", "signature"],
+    "coin": [*"🪙💲💰💸💴💵💶💷💳", "prêt", "emprunt"],
 }
 
 
